@@ -2,57 +2,229 @@
   position: relative;
   flex: 1;
   min-height: 0;
+  margin: 12px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--alvin-border);
 }
 
 .mapview__map {
   height: 100%;
   width: 100%;
-  background: var(--alvin-bg);
+  background: #0b1220;
 }
 
-/* Keep Leaflet controls/tiles readable on the dark shell */
-.mapview .leaflet-control-attribution {
-  background: rgba(18, 26, 43, 0.8);
+/* MapLibre attribution + controls on the dark shell */
+.mapview .maplibregl-ctrl-attrib {
+  background: rgba(11, 18, 32, 0.8);
+}
+
+.mapview .maplibregl-ctrl-attrib a {
   color: var(--alvin-text-dim);
 }
 
-.mapview .leaflet-control-attribution a {
-  color: var(--alvin-accent-2);
+.mapview .maplibregl-ctrl-group {
+  background: rgba(18, 26, 43, 0.92);
+  border: 1px solid var(--alvin-border);
 }
 
-.mapview__legend {
+.mapview .maplibregl-ctrl-group button + button {
+  border-top: 1px solid var(--alvin-border);
+}
+
+.mapview .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+  filter: invert(1);
+}
+
+/* Comfort legend */
+.mapview__time-icon {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Emergency evacuation banner */
+.mapview__evac {
   position: absolute;
-  top: 16px;
-  left: 16px;
+  top: 14px;
+  left: 14px;
   z-index: 1000;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
+  width: 260px;
   padding: 14px 16px;
-  min-width: 180px;
-  background: rgba(18, 26, 43, 0.92);
-  border: 1px solid var(--alvin-border);
+  background: rgba(30, 12, 16, 0.92);
+  border: 1px solid var(--alvin-danger);
   border-radius: 12px;
   backdrop-filter: blur(6px);
+  box-shadow: 0 0 0 4px rgba(242, 85, 95, 0.12);
 }
 
-.mapview__legend-title {
-  font-size: 13px;
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.mapview__legend-row {
+.mapview__evac-head {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 13px;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: var(--alvin-danger);
+}
+
+.mapview__evac-name {
+  margin-top: 4px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--alvin-text);
+}
+
+.mapview__evac-sub {
+  font-size: 11px;
   color: var(--alvin-text-dim);
 }
 
-.mapview__legend-swatch {
-  width: 14px;
-  height: 14px;
-  border-radius: 4px;
-  flex-shrink: 0;
+.mapview__evac-meta {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--alvin-text);
+}
+
+.mapview__evac-go {
+  margin-top: 8px;
+  text-align: center;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--alvin-danger);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.mapview__evac-go:hover {
+  filter: brightness(1.08);
+}
+
+/* Evacuation-center marker */
+.evac-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.evac-marker__label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--alvin-danger);
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.evac-marker__pin {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--alvin-danger);
+  box-shadow: 0 0 0 6px rgba(242, 85, 95, 0.2), 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Live clock */
+.mapview__clock {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  background: rgba(18, 26, 43, 0.92);
+  border: 1px solid var(--alvin-border);
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+  color: var(--alvin-accent-2);
+}
+
+.mapview__clock-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.mapview__clock-time {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--alvin-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.mapview__clock-date {
+  font-size: 11px;
+  color: var(--alvin-text-dim);
+}
+
+/* Clickable building marker */
+.building-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.building-marker__label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--alvin-text);
+  background: rgba(10, 17, 32, 0.9);
+  border: 1px solid var(--alvin-border);
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.building-marker__pin {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: #04140f;
+  background: linear-gradient(135deg, var(--alvin-accent), var(--alvin-accent-2));
+  box-shadow: 0 0 0 6px rgba(45, 212, 191, 0.18), 0 4px 12px rgba(0, 0, 0, 0.4);
+  transition: transform 0.15s;
+}
+
+.building-marker:hover .building-marker__pin {
+  transform: scale(1.08);
+}
+
+/* Reset-view button */
+.mapview__reset {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  z-index: 1000;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--alvin-border);
+  background: rgba(18, 26, 43, 0.92);
+  color: var(--alvin-text);
+  font-size: 13px;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+}
+
+.mapview__reset:hover {
+  border-color: var(--alvin-accent-2);
 }

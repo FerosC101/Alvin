@@ -1,0 +1,51 @@
+.map-overview {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.map-overview__stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+/* MapView carries its own 12px margin; the aside matches on the remaining sides. */
+.map-overview__aside {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 300px;
+  flex-shrink: 0;
+  margin: 12px 12px 12px 0;
+  min-height: 0;
+}
+
+.map-overview__reopen {
+  align-self: flex-start;
+  margin: 12px 12px 12px 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--alvin-border);
+  background: var(--alvin-surface);
+  color: var(--alvin-text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--alvin-shadow);
+}
+
+.map-overview__reopen:hover {
+  border-color: var(--alvin-accent-2);
+}
+
+@media (max-width: 1000px) {
+  .map-overview__stage {
+    flex-direction: column;
+  }
+  .map-overview__aside {
+    width: auto;
+    margin: 0 12px 12px;
+  }
+}

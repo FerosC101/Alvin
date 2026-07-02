@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standard]
+firebase-admin
+networkx
+requests
+python-dotenv

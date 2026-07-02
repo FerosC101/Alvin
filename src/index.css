@@ -1,14 +1,18 @@
 :root {
-  --alvin-bg: #0b1220;
-  --alvin-surface: #121a2b;
-  --alvin-surface-2: #1a2438;
-  --alvin-border: #233149;
-  --alvin-text: #e6edf7;
-  --alvin-text-dim: #8ca0bd;
-  --alvin-accent: #21d0a3;
-  --alvin-accent-2: #38bdf8;
-  --alvin-warn: #fbbf24;
-  --alvin-danger: #f5555d;
+  /* Balanced dark theme, keyed to the ALVIN logo (royal blue → teal/cyan) */
+  --alvin-bg: #0a1120;
+  --alvin-surface: #111b2e;
+  --alvin-surface-2: #19273f;
+  --alvin-border: #24344f;
+  --alvin-text: #e8eef8;
+  --alvin-text-dim: #899fbd;
+  --alvin-accent: #2dd4bf;
+  --alvin-accent-2: #4f8ef7;
+  --alvin-active-bg: rgba(79, 142, 247, 0.16);
+  --alvin-active-text: #8fb8ff;
+  --alvin-warn: #f5b544;
+  --alvin-danger: #f2555f;
+  --alvin-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 8px 24px rgba(0, 0, 0, 0.28);
 
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   color-scheme: dark;

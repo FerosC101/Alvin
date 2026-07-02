@@ -1,0 +1,157 @@
+.sidebar {
+  width: 236px;
+  flex-shrink: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 18px 14px;
+  background: var(--alvin-surface);
+  border-right: 1px solid var(--alvin-border);
+  overflow-y: auto;
+}
+
+.sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar__logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.sidebar__title {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.sidebar__name {
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.5px;
+}
+
+.sidebar__tagline {
+  font-size: 10px;
+  color: var(--alvin-text-dim);
+}
+
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 12px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--alvin-text-dim);
+  transition: background 0.15s, color 0.15s;
+}
+
+.sidebar__link:hover {
+  color: var(--alvin-text);
+  background: var(--alvin-surface-2);
+}
+
+.sidebar__link--active {
+  color: var(--alvin-active-text);
+  background: var(--alvin-active-bg);
+  font-weight: 600;
+}
+
+.sidebar__icon {
+  display: inline-flex;
+  color: currentColor;
+}
+
+.sidebar__weather {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--alvin-border);
+}
+
+.sidebar__section-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--alvin-text-dim);
+}
+
+.sidebar__city {
+  font-size: 13px;
+  color: var(--alvin-text);
+}
+
+.sidebar__temp-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sidebar__weather-icon {
+  display: inline-flex;
+  color: var(--alvin-accent-2);
+}
+
+.sidebar__temp {
+  display: block;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.sidebar__temp-unit {
+  font-size: 15px;
+  color: var(--alvin-text-dim);
+  margin-left: 2px;
+}
+
+.sidebar__condition {
+  font-size: 12px;
+  color: var(--alvin-accent-2);
+}
+
+.sidebar__metrics {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sidebar__metrics div {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.sidebar__metrics dt {
+  color: var(--alvin-text-dim);
+}
+
+.sidebar__metrics dd {
+  margin: 0;
+  color: var(--alvin-text);
+}
+
+.sidebar__source {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 10px;
+  color: var(--alvin-text-dim);
+}

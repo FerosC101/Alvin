@@ -1,7 +1,12 @@
 import os
 import requests
 from datetime import datetime, timezone
+from dotenv import load_dotenv
+
+load_dotenv()  # read config from a local .env file if present
+
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import firebase_admin
 from firebase_admin import credentials, firestore
@@ -13,15 +18,51 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Initialize Firebase
-CREDENTIALS_PATH = "alvin-661c5-firebase-adminsdk-fbsvc-6838c1e821.json"
-if not os.path.exists(CREDENTIALS_PATH):
-    raise FileNotFoundError(f"Critical Error: '{CREDENTIALS_PATH}' not found.")
+# --- CONFIG (via environment variables; see .env.example) ---
+# Comma-separated list of allowed frontend origins.
+CORS_ORIGINS = os.getenv(
+    "ALVIN_CORS_ORIGINS",
+    "http://localhost:5173,http://localhost:5174",
+).split(",")
+CREDENTIALS_PATH = os.getenv(
+    "FIREBASE_CREDENTIALS",
+    "alvin-661c5-firebase-adminsdk-fbsvc-6838c1e821.json",
+)
+OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY", "")
 
-cred = credentials.Certificate(CREDENTIALS_PATH)
-if not firebase_admin._apps:
-    firebase_admin.initialize_app(cred)
-db = firestore.client()
+# Allow the Vite frontend (dev server) to call this API from the browser.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[o.strip() for o in CORS_ORIGINS if o.strip()],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Initialize Firebase. If credentials are missing we start in a degraded mode
+# so the API can still boot for local frontend work — Firestore-backed
+# endpoints then return a clear 503 instead of crashing the whole server.
+db = None
+if os.path.exists(CREDENTIALS_PATH):
+    cred = credentials.Certificate(CREDENTIALS_PATH)
+    if not firebase_admin._apps:
+        firebase_admin.initialize_app(cred)
+    db = firestore.client()
+else:
+    print(
+        f"WARNING: Firebase credentials '{CREDENTIALS_PATH}' not found. "
+        "Firestore endpoints will return 503 until configured."
+    )
+
+
+def require_db():
+    """Guard for Firestore-backed endpoints when running without credentials."""
+    if db is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Firestore unavailable: Firebase credentials not configured.",
+        )
+    return db
 
 # --- PYDANTIC SCHEMAS (Data Validation) ---
 
@@ -63,11 +104,12 @@ class SensorReading(BaseModel):
 
 @app.get("/")
 def read_root():
-    return {"status": "online", "project": "ALVIN Backend Engine", "firebase_connected": True}
+    return {"status": "online", "project": "ALVIN Backend Engine", "firebase_connected": db is not None}
 
 # Endpoint to add or update a structural Node
 @app.post("/api/nodes", tags=["Map Infrastructure"])
 def create_or_update_node(node: Node):
+    require_db()
     try:
         db.collection("nodes").document(node.id).set(node.model_dump())
         return {"status": "success", "message": f"Node {node.id} successfully saved."}
@@ -77,6 +119,7 @@ def create_or_update_node(node: Node):
 # Endpoint to add or update a walkable Pathway (Edge)
 @app.post("/api/edges", tags=["Map Infrastructure"])
 def create_or_update_edge(edge: Edge):
+    require_db()
     try:
         source_doc = db.collection("nodes").document(edge.source).get()
         target_doc = db.collection("nodes").document(edge.target).get()
@@ -101,6 +144,7 @@ def navigate(
     ALVIN Dynamic Pathfinding Engine.
     Computes real-time routing paths while adjusting to structural blocks and comfort preferences.
     """
+    require_db()
     try:
         G = nx.Graph()
         
@@ -170,6 +214,7 @@ def update_global_emergency(status: SystemStatus):
     """
     Updates the global system status (e.g., triggering a campus-wide fire alarm).
     """
+    require_db()
     try:
         db.collection("system_status").document("current_state").set(status.model_dump())
         return {
@@ -185,6 +230,7 @@ def update_path_status(edge_id: str, update: EdgeStatusUpdate):
     Instantly blocks or opens a specific pathway. 
     ALVIN's navigation engine will automatically route around blocked paths on the next request.
     """
+    require_db()
     try:
         edge_ref = db.collection("edges").document(edge_id)
         
@@ -221,14 +267,13 @@ def calculate_comfort_score(temp: float, humidity: float, aqi: float) -> float:
     return max(0.0, min(100.0, round(raw_score, 1)))
 
 
-@app.post("/api/sensors/ingest", tags=["Sensor Data & Intelligence"])
 def get_sta_mesa_weather():
 
     """
     Utility Function: Fetches real-time weather data for Sta. Mesa, Manila.
-    Requires a free API key from openweathermap.org. 
+    Requires a free API key from openweathermap.org.
     """
-    API_KEY = "75fb14edf2704573b25f21703b0c5cfa"  
+    API_KEY = OPENWEATHER_API_KEY
     CITY = "Manila,PH"
     # We ask for metric units so the temperature comes back in Celsius
     url = f"http://api.openweathermap.org/data/2.5/weather?q={CITY}&appid={API_KEY}&units=metric"
@@ -310,11 +355,15 @@ def fetch_current_weather():
     """
 
     return get_sta_mesa_weather()
+
+
+@app.post("/api/sensors/ingest", tags=["Sensor Data & Intelligence"])
 def ingest_sensor_data(reading: SensorReading):
     """
     Receives live environmental data from ESP32 microcontrollers.
     Calculates the comfort score and triggers an automatic map update.
     """
+    require_db()
     try:
         data = reading.model_dump()
         unique_doc_id = f"{reading.sensor_id}_{int(reading.timestamp.timestamp())}"
@@ -350,6 +399,7 @@ def get_live_sensor_readings():
     Dashboard Endpoint: Retrieves the most recent environmental readings 
     for all active nodes to display live metrics on the UI.
     """
+    require_db()
     try:
         # Fetch all nodes from Firestore to see their current states
         nodes_ref = db.collection("nodes").stream()
@@ -379,6 +429,7 @@ def get_dashboard_summary_stats():
     Dashboard Endpoint: Calculates overall infrastructure intelligence statistics 
     (e.g., system-wide average comfort level, alert statuses).
     """
+    require_db()
     try:
         nodes_ref = db.collection("nodes").stream()
         
