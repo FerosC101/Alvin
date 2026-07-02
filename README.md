@@ -1,44 +1,53 @@
-# ALVIN — Adaptive Living Virtual Intelligence Network
+# Malita bois - Adaptive Living Virtual Intelligence Network (ALVIN)
 
-A human-centered 3D Digital Twin for smart environmental navigation, comfort,
-and safety. ALVIN combines IoT sensing, GIS mapping, weather intelligence, and
-smart recommendations to answer one question: **"Where should I stay right now?"**
+> **Note:** This project was developed for **SparkFest 2026**.
 
-This repo has two parts:
+## Project Brief
+**ALVIN (Adaptive Living Virtual Intelligence Network)** is an innovative, human-centered 3D Digital Twin designed to address the critical need for real-time environmental awareness in public and private infrastructure. 
 
-- **Frontend** (`/`) — React + Vite dashboard (this package).
-- **Backend** (`alvin-backend/`) — FastAPI engine (routing, sensors, Firebase). See its [README](alvin-backend/README.md).
+Instead of passive visualization, ALVIN acts as an active decision-support system. By integrating IoT environmental sensing, GIS mapping, weather intelligence, and predictive analytics, ALVIN continuously evaluates indoor and outdoor conditions to recommend the safest, coolest, driest, and most comfortable places to stay. During emergencies (e.g., fires, floods, earthquakes), the system dynamically adapts to provide real-time, safe evacuation routes and assembly areas.
 
-## Frontend setup
+## Core Features
+* **Interactive 3D Digital Twin:** Navigate floors, click rooms, view live environmental conditions, and visualize comfort zones.
+* **Smart Place Recommendation:** Computes an *Environmental Comfort Score* (based on temperature, humidity, airflow, and weather) to suggest the best places to study, wait, rest, or meet.
+* **Live Heat & Rain Map:** GIS visualization of outdoor heat indexes, rain intensity, cooling zones, and covered walkways.
+* **Dynamic Environmental Navigation:** Suggests shaded paths on sunny days, covered walkways during rain, and safest routes during disasters.
+* **Emergency Digital Twin:** Adapts in real-time to highlight inaccessible rooms, blocked entrances, nearest exits, and estimated evacuation times.
 
-```bash
-npm install
-cp .env.example .env   # set VITE_API_URL if the backend isn't on localhost:8000
-npm run dev
-```
+---
 
-The UI works offline: if the backend is unreachable, live data falls back to
-mock data (`src/data/mockData.js`).
+## Google Technologies Used
+* **Firebase:** Utilized for real-time data storage, retrieval, and seamless IoT-to-Cloud communication via REST API. 
 
-## Structure
+---
 
-```
-src/
-  components/   Sidebar, TopBar, MapView, BottomPanel, BuildingViewer, Layout
-  pages/        MapOverview, ThreeDTwin, Environmental, Recommendations, Emergency, Devices
-  services/     api.js — backend client (fails soft to mock)
-  config/       models.js — 3D model registry
-  data/         mockData.js — fallback/demo data
-public/models/  3D assets (main-building.glb, Room.glb, rooms/*.glb)
-```
+## Tech Stack & Architecture
 
-## 3D models
+### Hardware Sensors & Main Parts
+| Component | Specification |
+| :--- | :--- |
+| **Humidity Sensor** | DHT22 / DHT11 |
+| **Temperature Sensor** | DHT22, LM35 |
+| **Air Velocity Sensor** | MQT-2 *(Not included in current actual build)* |
+| **Connectivity** | ESP32 *(Alternative: Arduino Uno)* |
 
-Drop `.glb` files in `public/models/`. The building is `main-building.glb`;
-`Room.glb` is the generic room model. Register per-room models in
-`src/config/models.js` under `ROOM_MODELS` (keyed by room id).
+### Software & Cloud Infrastructure
+| Component | Technology |
+| :--- | :--- |
+| **Communication (IoT to Cloud)** | HTTP POST to Firebase REST API |
+| **Frontend** | React.js, Leaflet.js (for GIS/Mapping) |
+| **Backend API** | Python |
+| **Database** | Firebase |
+| **Hosting** | Vercel |
+| **Pathfinding Engine** | NetworkX |
+| **Weather Integrations** | OpenWeatherMap |
 
-## Live data
+---
 
-`src/services/api.js` talks to the backend endpoints (weather, live sensors,
-stats, navigation). Set `VITE_API_URL` to point at a non-default backend.
+## Team Name and Members
+**Team Name:** Malita bois
+
+* **John Ray Cacananta**
+* **Alvin Dellomas**
+* **Gabriel John Solomon**
+* **Vince Anjo Villar**
