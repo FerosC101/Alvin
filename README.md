@@ -35,7 +35,7 @@ Instead of passive visualization, ALVIN acts as an active decision-support syste
 | Component | Technology |
 | :--- | :--- |
 | **Communication (IoT to Cloud)** | HTTP POST to Firebase REST API |
-| **Frontend** | React.js, Leaflet.js (for GIS/Mapping) |
+| **Frontend** | React.js, Leaflet.js |
 | **Backend API** | Python |
 | **Database** | Firebase |
 | **Hosting** | Vercel |
@@ -45,7 +45,7 @@ Instead of passive visualization, ALVIN acts as an active decision-support syste
 ---
 
 ## Team Name and Members
-**Team Name:** Malita bois
+**Team Name:** Malita Bois
 
 * **John Ray Cacananta**
 * **Alvin Dellomas**
