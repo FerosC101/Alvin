@@ -42,6 +42,25 @@ function addBuildings(map) {
   )
 }
 
+// Generate a simulated heat field of weighted points around a center, so the
+// heatmap layer has a distribution to render (hotter toward the middle).
+function makeHeatPoints([lng, lat], n = 60, spread = 0.004) {
+  const features = []
+  for (let i = 0; i < n; i++) {
+    const angle = Math.random() * Math.PI * 2
+    const r = Math.sqrt(Math.random()) * spread
+    const dLng = (Math.cos(angle) * r) / Math.cos((lat * Math.PI) / 180)
+    const dLat = Math.sin(angle) * r
+    const mag = Math.max(0, 1 - r / spread) * (0.4 + Math.random() * 0.6)
+    features.push({
+      type: 'Feature',
+      properties: { mag },
+      geometry: { type: 'Point', coordinates: [lng + dLng, lat + dLat] },
+    })
+  }
+  return { type: 'FeatureCollection', features }
+}
+
 // Great-circle distance in metres (fallback when routing is unavailable).
 function haversine([lng1, lat1], [lng2, lat2]) {
   const R = 6371000
@@ -79,10 +98,12 @@ export default function MapView({ onBuildingClick }) {
   const clickRef = useRef(onBuildingClick)
   clickRef.current = onBuildingClick
   const evacMarkerRef = useRef(null)
+  const heatRafRef = useRef(0)
   const { active, origin, evac } = useEmergency()
   const [now, setNow] = useState(() => new Date())
   const [routeInfo, setRouteInfo] = useState(null)
   const [target, setTarget] = useState(evac) // resolved evacuation destination
+  const [heatmap, setHeatmap] = useState(false)
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 1000)
@@ -211,6 +232,98 @@ export default function MapView({ onBuildingClick }) {
     }
   }, [active, origin, evac])
 
+  // Simulated 2D heatmap + expanding "wave" ring, toggled by the button.
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+
+    const remove = () => {
+      cancelAnimationFrame(heatRafRef.current)
+      for (const id of ['heat-wave-ring', 'heat-layer']) {
+        if (map.getLayer(id)) map.removeLayer(id)
+      }
+      for (const s of ['heat-ring-src', 'heat-src']) {
+        if (map.getSource(s)) map.removeSource(s)
+      }
+    }
+
+    const add = () => {
+      if (map.getLayer('heat-layer')) return
+      const firstSymbol = map.getStyle().layers.find((l) => l.type === 'symbol')?.id
+
+      map.addSource('heat-src', { type: 'geojson', data: makeHeatPoints(BGC_CENTER) })
+      map.addLayer(
+        {
+          id: 'heat-layer',
+          type: 'heatmap',
+          source: 'heat-src',
+          paint: {
+            'heatmap-weight': ['interpolate', ['linear'], ['get', 'mag'], 0, 0, 1, 1],
+            'heatmap-intensity': 1,
+            'heatmap-radius': 30,
+            'heatmap-opacity': 0.75,
+            'heatmap-color': [
+              'interpolate', ['linear'], ['heatmap-density'],
+              0, 'rgba(0,0,0,0)',
+              0.2, '#2dd4bf',
+              0.4, '#22c55e',
+              0.6, '#fbbf24',
+              0.8, '#fb923c',
+              1, '#ef4444',
+            ],
+          },
+        },
+        firstSymbol,
+      )
+
+      map.addSource('heat-ring-src', {
+        type: 'geojson',
+        data: { type: 'Feature', geometry: { type: 'Point', coordinates: BGC_CENTER } },
+      })
+      map.addLayer(
+        {
+          id: 'heat-wave-ring',
+          type: 'circle',
+          source: 'heat-ring-src',
+          paint: {
+            'circle-radius': 0,
+            'circle-color': 'rgba(239,68,68,0.12)',
+            'circle-stroke-color': '#ef4444',
+            'circle-stroke-width': 2,
+            'circle-stroke-opacity': 0.6,
+          },
+        },
+        firstSymbol,
+      )
+
+      const t0 = performance.now()
+      const animate = (t) => {
+        if (!map.getLayer('heat-layer')) return
+        const s = (t - t0) / 1000
+        const pulse = 0.5 + 0.5 * Math.sin(s * 1.6)
+        map.setPaintProperty('heat-layer', 'heatmap-radius', 26 + pulse * 24)
+        map.setPaintProperty('heat-layer', 'heatmap-intensity', 0.7 + pulse * 0.7)
+        const ring = (s % 3) / 3
+        map.setPaintProperty('heat-wave-ring', 'circle-radius', ring * 100)
+        map.setPaintProperty('heat-wave-ring', 'circle-stroke-opacity', 0.7 * (1 - ring))
+        heatRafRef.current = requestAnimationFrame(animate)
+      }
+      heatRafRef.current = requestAnimationFrame(animate)
+    }
+
+    if (heatmap) {
+      if (map.isStyleLoaded()) add()
+      else map.once('load', add)
+    } else if (map.isStyleLoaded()) {
+      remove()
+    }
+
+    return () => {
+      cancelAnimationFrame(heatRafRef.current)
+      if (map.isStyleLoaded()) remove()
+    }
+  }, [heatmap])
+
   const resetView = () => mapRef.current?.easeTo({ ...INITIAL_VIEW, duration: 800 })
 
   const hour = now.getHours()
@@ -253,9 +366,17 @@ export default function MapView({ onBuildingClick }) {
         </div>
       )}
 
-      <button className="mapview__reset" onClick={resetView}>
-        Reset view
-      </button>
+      <div className="mapview__tools">
+        <button
+          className={`mapview__tool${heatmap ? ' mapview__tool--on' : ''}`}
+          onClick={() => setHeatmap((v) => !v)}
+        >
+          <Icon name="heatmap" size={15} /> Heatmap
+        </button>
+        <button className="mapview__tool" onClick={resetView}>
+          Reset view
+        </button>
+      </div>
     </section>
   )
 }

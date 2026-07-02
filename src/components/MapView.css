@@ -209,12 +209,20 @@
   transform: scale(1.08);
 }
 
-/* Reset-view button */
-.mapview__reset {
+/* Bottom-left map tools */
+.mapview__tools {
   position: absolute;
   left: 14px;
   bottom: 14px;
   z-index: 1000;
+  display: flex;
+  gap: 8px;
+}
+
+.mapview__tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 8px 14px;
   border-radius: 8px;
   border: 1px solid var(--alvin-border);
@@ -225,6 +233,11 @@
   backdrop-filter: blur(6px);
 }
 
-.mapview__reset:hover {
+.mapview__tool:hover {
   border-color: var(--alvin-accent-2);
+}
+
+.mapview__tool--on {
+  border-color: var(--alvin-accent);
+  color: var(--alvin-accent);
 }

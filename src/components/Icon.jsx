@@ -64,6 +64,13 @@ const PATHS = {
       <path d="M2 21h20M8 7h.01M12 7h.01M8 11h.01M12 11h.01M8 15h.01M12 15h.01" />
     </>
   ),
+  heatmap: (
+    <>
+      <circle cx="12" cy="12" r="1.5" />
+      <path d="M8.1 8.1a5.5 5.5 0 0 0 0 7.8M15.9 15.9a5.5 5.5 0 0 0 0-7.8" />
+      <path d="M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 18.7a9.5 9.5 0 0 0 0-13.4" />
+    </>
+  ),
 }
 
 export default function Icon({ name, size = 18, strokeWidth = 1.8, className }) {
