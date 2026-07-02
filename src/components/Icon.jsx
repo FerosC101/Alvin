@@ -57,6 +57,13 @@ const PATHS = {
     </>
   ),
   close: <path d="M18 6 6 18M6 6l12 12" />,
+  building: (
+    <>
+      <path d="M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16" />
+      <path d="M16 8h2a2 2 0 0 1 2 2v11" />
+      <path d="M2 21h20M8 7h.01M12 7h.01M8 11h.01M12 11h.01M8 15h.01M12 15h.01" />
+    </>
+  ),
 }
 
 export default function Icon({ name, size = 18, strokeWidth = 1.8, className }) {

@@ -54,9 +54,11 @@ function addBuildings(map) {
   )
 }
 
-export default function MapView() {
+export default function MapView({ onBuildingClick }) {
   const containerRef = useRef(null)
   const mapRef = useRef(null)
+  const clickRef = useRef(onBuildingClick)
+  clickRef.current = onBuildingClick
   const [time, setTime] = useState(8) // hours from 6:00 AM (0-16)
 
   useEffect(() => {
@@ -72,6 +74,23 @@ export default function MapView() {
     })
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right')
     map.on('load', () => addBuildings(map))
+
+    // Clickable "Main Building" marker → opens the building panel.
+    const el = document.createElement('button')
+    el.className = 'building-marker'
+    el.type = 'button'
+    el.innerHTML = `
+      <span class="building-marker__label">Main Building</span>
+      <span class="building-marker__pin">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"/><path d="M16 8h2a2 2 0 0 1 2 2v11"/><path d="M2 21h20M8 7h.01M12 7h.01M8 11h.01M12 11h.01M8 15h.01M12 15h.01"/>
+        </svg>
+      </span>`
+    el.addEventListener('click', () => clickRef.current?.())
+    new maplibregl.Marker({ element: el, anchor: 'bottom' })
+      .setLngLat(BGC_CENTER)
+      .addTo(map)
+
     mapRef.current = map
     return () => map.remove()
   }, [])

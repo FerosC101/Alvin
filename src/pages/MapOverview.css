@@ -22,34 +22,6 @@
   min-height: 0;
 }
 
-.map-overview__picker {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 8px 12px;
-  font-size: 12px;
-  color: var(--alvin-text-dim);
-  background: var(--alvin-surface);
-  border: 1px solid var(--alvin-border);
-  border-radius: 10px;
-  box-shadow: var(--alvin-shadow);
-}
-
-.map-overview__picker select {
-  flex: 1;
-  max-width: 170px;
-  appearance: none;
-  padding: 6px 10px;
-  border-radius: 8px;
-  border: 1px solid var(--alvin-border);
-  background: var(--alvin-surface-2);
-  color: var(--alvin-text);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
 .map-overview__reopen {
   align-self: flex-start;
   margin: 12px 12px 12px 0;

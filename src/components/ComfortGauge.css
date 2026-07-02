@@ -1,0 +1,36 @@
+.gauge {
+  position: relative;
+  align-self: center;
+}
+
+.gauge__center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+}
+
+.gauge__value {
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.gauge__unit {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--alvin-text-dim);
+}
+
+.gauge__caption {
+  font-size: 10px;
+  color: var(--alvin-text-dim);
+}
+
+.gauge__band {
+  font-size: 12px;
+  font-weight: 700;
+}

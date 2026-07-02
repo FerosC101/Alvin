@@ -1,36 +1,7 @@
-import { COMFORT_BANDS, comfortColor, airflowLabel, noiseLabel } from '../data/mockData'
+import { airflowLabel, noiseLabel } from '../data/mockData'
 import Icon from './Icon'
+import ComfortGauge from './ComfortGauge'
 import './RoomPanel.css'
-
-function bandName(score) {
-  const band = COMFORT_BANDS.find((b) => score >= b.min)
-  return band ? band.label.split(' (')[0] : 'Unknown'
-}
-
-// Circular comfort gauge (SVG progress ring).
-function ComfortGauge({ score }) {
-  const r = 46
-  const c = 2 * Math.PI * r
-  const color = comfortColor(score)
-  return (
-    <div className="gauge">
-      <svg width="128" height="128" viewBox="0 0 128 128">
-        <circle cx="64" cy="64" r={r} fill="none" stroke="var(--alvin-surface-2)" strokeWidth="10" />
-        <circle
-          cx="64" cy="64" r={r} fill="none" stroke={color} strokeWidth="10"
-          strokeLinecap="round" strokeDasharray={c}
-          strokeDashoffset={c * (1 - score / 100)}
-          transform="rotate(-90 64 64)"
-        />
-      </svg>
-      <div className="gauge__center">
-        <span className="gauge__value">{score}<span className="gauge__unit">%</span></span>
-        <span className="gauge__caption">Comfort Score</span>
-        <span className="gauge__band" style={{ color }}>{bandName(score)}</span>
-      </div>
-    </div>
-  )
-}
 
 export default function RoomPanel({ room, onClose }) {
   if (!room) return null
