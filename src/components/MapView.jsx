@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import maplibregl from 'maplibre-gl'
 import { useEmergency } from '../context/EmergencyContext'
+import { fetchNearestEvac } from '../services/api'
 import Icon from './Icon'
 import './MapView.css'
 
@@ -81,6 +82,7 @@ export default function MapView({ onBuildingClick }) {
   const { active, origin, evac } = useEmergency()
   const [now, setNow] = useState(() => new Date())
   const [routeInfo, setRouteInfo] = useState(null)
+  const [target, setTarget] = useState(evac) // resolved evacuation destination
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 1000)
@@ -142,7 +144,17 @@ export default function MapView({ onBuildingClick }) {
 
     let cancelled = false
     const draw = async () => {
-      const { geometry, distance, duration } = await getRoute(origin.coords, evac.coords)
+      // Resolve the nearest partner evacuation center (fallback to default).
+      let dest = evac
+      const near = await fetchNearestEvac(origin.coords[1], origin.coords[0])
+      if (near?.status === 'success' && near.nearest) {
+        const n = near.nearest
+        dest = { name: n.name, partner: n.partner, address: n.address, coords: [n.lng, n.lat] }
+      }
+      if (cancelled || !mapRef.current) return
+      setTarget(dest)
+
+      const { geometry, distance, duration } = await getRoute(origin.coords, dest.coords)
       if (cancelled || !mapRef.current) return
       const data = { type: 'Feature', geometry }
 
@@ -170,14 +182,14 @@ export default function MapView({ onBuildingClick }) {
       const el = document.createElement('div')
       el.className = 'evac-marker'
       el.innerHTML = `
-        <span class="evac-marker__label">${evac.name}</span>
+        <span class="evac-marker__label">${dest.name}</span>
         <span class="evac-marker__pin">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M10.3 3.6 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.6a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/>
           </svg>
         </span>`
       evacMarkerRef.current = new maplibregl.Marker({ element: el, anchor: 'bottom' })
-        .setLngLat(evac.coords)
+        .setLngLat(dest.coords)
         .addTo(map)
 
       // Frame the whole route.
@@ -206,7 +218,7 @@ export default function MapView({ onBuildingClick }) {
   const timeStr = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' })
   const dateStr = now.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })
 
-  const gmaps = `https://www.google.com/maps/dir/?api=1&origin=${origin.coords[1]},${origin.coords[0]}&destination=${evac.coords[1]},${evac.coords[0]}&travelmode=walking`
+  const gmaps = `https://www.google.com/maps/dir/?api=1&origin=${origin.coords[1]},${origin.coords[0]}&destination=${target.coords[1]},${target.coords[0]}&travelmode=walking`
 
   return (
     <section className="mapview">
@@ -228,8 +240,8 @@ export default function MapView({ onBuildingClick }) {
             <Icon name="alert" size={18} />
             Emergency — proceed to evacuation
           </div>
-          <div className="mapview__evac-name">{evac.name}</div>
-          <div className="mapview__evac-sub">{evac.partner} · {evac.address}</div>
+          <div className="mapview__evac-name">{target.name}</div>
+          <div className="mapview__evac-sub">{target.partner} · {target.address}</div>
           {routeInfo && (
             <div className="mapview__evac-meta">
               {(routeInfo.distance / 1000).toFixed(2)} km · ~{Math.round(routeInfo.duration / 60)} min walk

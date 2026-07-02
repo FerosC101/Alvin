@@ -1,28 +1,34 @@
-import { ROOMS, comfortColor } from '../data/mockData'
+import { comfortColor } from '../data/mockData'
+import { useRooms } from '../hooks/useLiveData'
 import './pages.css'
 
-// Rank rooms by comfort score and map activities to the best spaces.
-const ranked = [...ROOMS].sort((a, b) => b.score - a.score)
-
-const ACTIVITIES = [
-  { activity: 'Best Place to Study', room: ranked[0] },
-  { activity: 'Best Waiting Area', room: ranked[1] },
-  { activity: 'Best Rest Area', room: ranked[2] },
-  { activity: 'Best Meeting Spot', room: ranked[3] },
+const ACTIVITY_LABELS = [
+  'Best Place to Study',
+  'Best Waiting Area',
+  'Best Rest Area',
+  'Best Meeting Spot',
 ]
 
 export default function Recommendations() {
+  const { rooms, live } = useRooms()
+  const ranked = [...rooms].sort((a, b) => b.score - a.score)
+  const activities = ACTIVITY_LABELS.map((activity, i) => ({ activity, room: ranked[i] })).filter(
+    (a) => a.room,
+  )
+
   return (
     <div className="page">
       <div className="page__header">
-        <h1 className="page__title">Smart Recommendations</h1>
+        <h1 className="page__title">
+          Smart Recommendations{live && <span className="live-badge">● LIVE</span>}
+        </h1>
         <p className="page__subtitle">
           ALVIN continuously suggests the safest, coolest, and most comfortable spaces based on current conditions.
         </p>
       </div>
 
       <div className="grid grid--rooms" style={{ marginBottom: 24 }}>
-        {ACTIVITIES.map(({ activity, room }) => (
+        {activities.map(({ activity, room }) => (
           <div key={activity} className="info-card">
             <span className="panel__label">{activity.toUpperCase()}</span>
             <div className="info-card__head">
@@ -31,8 +37,8 @@ export default function Recommendations() {
                 {room.score}%
               </span>
             </div>
-            <div className="metric-row"><span>Temperature</span><span>{room.temp}°C</span></div>
-            <div className="metric-row"><span>Humidity</span><span>{room.humidity}%</span></div>
+            <div className="metric-row"><span>Temperature</span><span>{room.temp ?? '—'}°C</span></div>
+            <div className="metric-row"><span>Humidity</span><span>{room.humidity ?? '—'}%</span></div>
           </div>
         ))}
       </div>
@@ -55,8 +61,8 @@ export default function Recommendations() {
                     ● {room.score}%
                   </span>
                 </td>
-                <td>{room.temp}°C</td>
-                <td>{room.humidity}%</td>
+                <td>{room.temp ?? '—'}°C</td>
+                <td>{room.humidity ?? '—'}%</td>
               </tr>
             ))}
           </tbody>

@@ -1,9 +1,13 @@
-import { ROOMS, DEVICES, comfortColor } from '../data/mockData'
+import { comfortColor } from '../data/mockData'
+import { useRooms, useDevices } from '../hooks/useLiveData'
 import './pages.css'
 
 const avg = (arr) => (arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0)
 
 export default function Analytics() {
+  const { rooms: ROOMS } = useRooms()
+  const { devices: DEVICES } = useDevices()
+
   const avgComfort = Math.round(avg(ROOMS.map((r) => r.score)))
   const alerts = ROOMS.filter((r) => r.score < 70).length
   const activeDevices = DEVICES.filter((d) => d.status === 'online').length

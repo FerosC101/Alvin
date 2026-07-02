@@ -1,15 +1,17 @@
-import { DEVICES } from '../data/mockData'
+import { useDevices } from '../hooks/useLiveData'
 import './pages.css'
 
-const online = DEVICES.filter((d) => d.status === 'online').length
-
 export default function Devices() {
+  const { devices, live } = useDevices()
+  const online = devices.filter((d) => d.status === 'online').length
+
   return (
     <div className="page">
       <div className="page__header">
         <h1 className="page__title">IoT Devices</h1>
         <p className="page__subtitle">
-          ESP32 sensor nodes deployed across the building — {online} of {DEVICES.length} online.
+          ESP32 sensor nodes deployed across the building — {online} of {devices.length} online.
+          {live && <span className="live-badge">● LIVE</span>}
         </p>
       </div>
 
@@ -21,7 +23,7 @@ export default function Devices() {
             </tr>
           </thead>
           <tbody>
-            {DEVICES.map((d) => (
+            {devices.map((d) => (
               <tr key={d.id}>
                 <td style={{ fontFamily: 'monospace' }}>{d.id}</td>
                 <td>{d.room}</td>

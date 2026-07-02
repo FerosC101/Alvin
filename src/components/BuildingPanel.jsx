@@ -1,13 +1,17 @@
 import BuildingViewer from './BuildingViewer'
 import ComfortGauge from './ComfortGauge'
 import Icon from './Icon'
-import { ROOMS, DEVICES, BUILDINGS, FLOORS } from '../data/mockData'
+import { BUILDINGS, FLOORS } from '../data/mockData'
+import { useRooms, useDevices } from '../hooks/useLiveData'
 import { BUILDING_MODEL } from '../config/models'
 import './BuildingPanel.css'
 
 const avg = (arr) => (arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0)
 
 export default function BuildingPanel({ onClose }) {
+  const { rooms: ROOMS } = useRooms()
+  const { devices: DEVICES } = useDevices()
+
   const avgComfort = Math.round(avg(ROOMS.map((r) => r.score)))
   const totalOcc = ROOMS.reduce((a, r) => a + r.occupancy, 0)
   const totalCap = ROOMS.reduce((a, r) => a + r.capacity, 0)
