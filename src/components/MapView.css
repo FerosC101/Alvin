@@ -92,8 +92,8 @@
   align-items: center;
 }
 
-/* Time slider */
-.mapview__timeslider {
+/* Live clock */
+.mapview__clock {
   position: absolute;
   top: 14px;
   left: 50%;
@@ -102,25 +102,30 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 14px;
+  padding: 8px 16px;
   background: rgba(18, 26, 43, 0.92);
   border: 1px solid var(--alvin-border);
   border-radius: 999px;
   backdrop-filter: blur(6px);
-  font-size: 12px;
-  color: var(--alvin-text-dim);
+  color: var(--alvin-accent-2);
 }
 
-.mapview__timeslider input[type='range'] {
-  width: 160px;
-  accent-color: var(--alvin-accent-2);
+.mapview__clock-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
 }
 
-.mapview__time-current {
+.mapview__clock-time {
+  font-size: 15px;
+  font-weight: 700;
   color: var(--alvin-text);
-  font-weight: 600;
-  min-width: 68px;
-  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.mapview__clock-date {
+  font-size: 11px;
+  color: var(--alvin-text-dim);
 }
 
 /* Clickable building marker */

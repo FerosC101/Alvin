@@ -59,7 +59,13 @@ export default function MapView({ onBuildingClick }) {
   const mapRef = useRef(null)
   const clickRef = useRef(onBuildingClick)
   clickRef.current = onBuildingClick
-  const [time, setTime] = useState(8) // hours from 6:00 AM (0-16)
+  const [now, setNow] = useState(() => new Date()) // live local clock
+
+  // Tick the clock every second.
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000)
+    return () => clearInterval(id)
+  }, [])
 
   useEffect(() => {
     const map = new maplibregl.Map({
@@ -97,13 +103,10 @@ export default function MapView({ onBuildingClick }) {
 
   const resetView = () => mapRef.current?.easeTo({ ...INITIAL_VIEW, duration: 800 })
 
-  const startHour = 6
-  const label = (h) => {
-    const hour24 = startHour + h
-    const period = hour24 >= 12 ? 'PM' : 'AM'
-    const hour12 = ((hour24 + 11) % 12) + 1
-    return `${hour12}:00 ${period}`
-  }
+  const hour = now.getHours()
+  const isDay = hour >= 6 && hour < 18
+  const timeStr = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' })
+  const dateStr = now.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })
 
   return (
     <section className="mapview">
@@ -122,20 +125,14 @@ export default function MapView({ onBuildingClick }) {
         </span>
       </div>
 
-      <div className="mapview__timeslider">
-        <span className="mapview__time-icon" aria-hidden="true"><Icon name="sun" size={16} /></span>
-        <span className="mapview__time-label">{label(0)}</span>
-        <input
-          type="range"
-          min="0"
-          max="16"
-          value={time}
-          onChange={(e) => setTime(Number(e.target.value))}
-          aria-label="Time of day"
-        />
-        <span className="mapview__time-label">{label(16)}</span>
-        <span className="mapview__time-icon" aria-hidden="true"><Icon name="moon" size={16} /></span>
-        <span className="mapview__time-current">{label(time)}</span>
+      <div className="mapview__clock">
+        <span className="mapview__time-icon" aria-hidden="true">
+          <Icon name={isDay ? 'sun' : 'moon'} size={16} />
+        </span>
+        <div className="mapview__clock-text">
+          <span className="mapview__clock-time">{timeStr}</span>
+          <span className="mapview__clock-date">{dateStr}</span>
+        </div>
       </div>
 
       <button className="mapview__reset" onClick={resetView}>
