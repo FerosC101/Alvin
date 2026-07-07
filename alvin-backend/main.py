@@ -22,7 +22,7 @@ app = FastAPI(
 # Comma-separated list of allowed frontend origins.
 CORS_ORIGINS = os.getenv(
     "ALVIN_CORS_ORIGINS",
-    "http://localhost:5173,http://localhost:5174",
+    "http://localhost:5173,http://localhost:5174,http://localhost:8080,http://127.0.0.1:8080",
 ).split(",")
 CREDENTIALS_PATH = os.getenv(
     "FIREBASE_CREDENTIALS",
@@ -273,7 +273,7 @@ def get_sta_mesa_weather():
     Utility Function: Fetches real-time weather data for Sta. Mesa, Manila.
     Requires a free API key from openweathermap.org.
     """
-    API_KEY = OPENWEATHER_API_KEY
+    API_KEY = "75fb14edf2704573b25f21703b0c5cfa"
     CITY = "Manila,PH"
     # We ask for metric units so the temperature comes back in Celsius
     url = f"http://api.openweathermap.org/data/2.5/weather?q={CITY}&appid={API_KEY}&units=metric"

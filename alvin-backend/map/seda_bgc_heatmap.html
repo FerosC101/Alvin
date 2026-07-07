@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_dcaf9f795da2fbd3e164c2551930d882 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <style>
+                .update-log-box {
+                    position: absolute;
+                    z-index: 1000;
+                    right: 16px;
+                    bottom: 16px;
+                    width: 260px;
+                    max-height: 180px;
+                    overflow-y: auto;
+                    background: rgba(255,255,255,0.92);
+                    border: 1px solid rgba(0,0,0,0.16);
+                    border-radius: 8px;
+                    box-shadow: 0 0 12px rgba(0,0,0,0.16);
+                    padding: 10px;
+                    font-family: Arial, sans-serif;
+                    font-size: 0.85rem;
+                    color: #222;
+                }
+                .update-log-box h4 {
+                    margin: 0 0 8px;
+                    font-size: 0.95rem;
+                    font-weight: 700;
+                }
+                .update-log-box .log-entry {
+                    margin-bottom: 6px;
+                    line-height: 1.3;
+                }
+                .update-log-box .log-entry:last-child {
+                    margin-bottom: 0;
+                }
+                .update-log-box .log-time {
+                    color: #555;
+                    font-size: 0.78rem;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+</head>
+<body>
+    
+    
+            <div class="folium-map" id="map_dcaf9f795da2fbd3e164c2551930d882" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_dcaf9f795da2fbd3e164c2551930d882 = L.map(
+                "map_dcaf9f795da2fbd3e164c2551930d882",
+                {
+                    center: [14.55076, 121.053077],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 17,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_806c37df13d3ed7610290deeec6e78c8 = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_806c37df13d3ed7610290deeec6e78c8.addTo(map_dcaf9f795da2fbd3e164c2551930d882);
+
+            // Ensure map is centered on Seda BGC
+            map_dcaf9f795da2fbd3e164c2551930d882.setView([14.55076, 121.053077], 17);
+
+            // Create a Font Awesome based location icon and add as a marker
+            var sedaLocationIcon = L.divIcon({
+                className: 'seda-location-icon',
+                html: '<i class="fa-solid fa-location-dot" style="color:#ff0000;font-size:48px;text-shadow:0 0 4px #fff"></i>',
+                iconSize: [48, 48],
+                iconAnchor: [24, 48]
+            });
+
+            var marker_seda_bgc = L.marker(
+                [14.55076, 121.053077],
+                {icon: sedaLocationIcon, bubblingMouseEvents: true}
+            ).addTo(map_dcaf9f795da2fbd3e164c2551930d882);
+
+            marker_seda_bgc.bindTooltip(
+                `<div>
+                     Seda BGC
+                 </div>`,
+                {"sticky": true}
+            );
+            // --- Roads overlay styled by temperature ---
+            var roadsGeoJson = {"type": "FeatureCollection", "features": []};
+            var roadsWeather = {"features": []};
+            var roadsLayer = null;
+            var legend = null;
+            var weatherControl = null;
+            var updateLogControl = null;
+            var WEATHER_API_URL = 'http://127.0.0.1:8000/api/weather/current';
+            var REFRESH_MS = 5000;
+
+            function getTemperatureColor(temp){
+                if (typeof temp !== 'number') return '#888888';
+                if (temp <= 28) return '#2471A3';
+                if (temp <= 34) return '#E67E22';
+                return '#C0392B';
+            }
+
+            function formatTempLabel(temp){
+                return typeof temp === 'number' ? temp.toFixed(1) + '°C' : 'N/A';
+            }
+
+            function fetchJson(path){
+                return fetch(path, {cache: 'no-store'})
+                    .then(function(resp){
+                        if(!resp.ok) throw new Error('fetch failed');
+                        return resp.json();
+                    });
+            }
+
+            function fetchCurrentWeather(){
+                return fetchJson(WEATHER_API_URL).catch(function(){
+                    return null;
+                });
+            }
+
+            function updateWeatherControl(weather){
+                if (!weatherControl){
+                    weatherControl = L.control({position: 'topleft'});
+                    weatherControl.onAdd = function(map){
+                        var div = L.DomUtil.create('div', 'info weather-control');
+                        div.style.background = 'white';
+                        div.style.padding = '8px 10px';
+                        div.style.boxShadow = '0 0 6px rgba(0,0,0,0.2)';
+                        div.style.fontSize = '0.9rem';
+                        div.innerHTML = '<strong>Current Weather</strong><br><span id="weather-temp">Loading...</span>';
+                        return div;
+                    };
+                    weatherControl.addTo(map_dcaf9f795da2fbd3e164c2551930d882);
+                }
+                var span = document.getElementById('weather-temp');
+                if(span){
+                    if(weather && weather.temperature_c != null){
+                        span.innerHTML = formatTempLabel(weather.temperature_c) + ' • ' + weather.condition;
+                    } else {
+                        span.innerHTML = 'Unavailable';
+                    }
+                }
+            }
+
+            function clearLayer(layer){
+                if(layer){
+                    layer.remove();
+                }
+            }
+
+            function createUpdateLogControl(){
+                if (!updateLogControl){
+                    updateLogControl = L.control({position: 'topright'});
+                    updateLogControl.onAdd = function(map){
+                        var div = L.DomUtil.create('div', 'update-log-box');
+                        div.innerHTML = '<h4>Update Log</h4><div id="update-log-entries"></div>';
+                        return div;
+                    };
+                    updateLogControl.addTo(map_dcaf9f795da2fbd3e164c2551930d882);
+                }
+            }
+
+            function logUpdate(message){
+                createUpdateLogControl();
+                var logContainer = document.getElementById('update-log-entries');
+                if (!logContainer) return;
+                var now = new Date();
+                var entry = document.createElement('div');
+                entry.className = 'log-entry';
+                entry.innerHTML = '<div>' + message + '</div>' +
+                    '<div class="log-time">' + now.toLocaleTimeString() + '</div>';
+                logContainer.insertBefore(entry, logContainer.firstChild);
+                while(logContainer.children.length > 8){
+                    logContainer.removeChild(logContainer.lastChild);
+                }
+            }
+
+            function renderRoads(){
+                clearLayer(roadsLayer);
+                clearLayer(legend);
+
+                if (!roadsGeoJson || !Array.isArray(roadsGeoJson.features)) return;
+
+                roadsLayer = L.geoJSON(roadsGeoJson, {
+                    style: function(feature){
+                        var t = feature.properties && feature.properties.temp;
+                        return {
+                            color: getTemperatureColor(t),
+                            weight: 4,
+                            opacity: 0.95,
+                            dashArray: t == null ? '4,6' : null
+                        };
+                    },
+                    onEachFeature: function(feature, layer){
+                        var t = feature.properties && feature.properties.temp;
+                        var tooltipText = 'Temp: ' + formatTempLabel(t);
+                        if(feature.properties && feature.properties.name){
+                            tooltipText = feature.properties.name + '<br>' + tooltipText;
+                        }
+                        layer.bindTooltip(tooltipText);
+                    }
+                }).addTo(map_dcaf9f795da2fbd3e164c2551930d882);
+
+                legend = L.control({position: 'bottomright'});
+                legend.onAdd = function(map){
+                    var div = L.DomUtil.create('div', 'info legend');
+                    var items = [
+                        {color: '#2471A3', label: 'Cool'},
+                        {color: '#E67E22', label: 'Warm'},
+                        {color: '#C0392B', label: 'Hot'}
+                    ];
+                    div.innerHTML = items.map(function(item){
+                        return '<i style="background:' + item.color + ';width:18px;height:12px;display:inline-block;margin-right:6px;"></i>' + item.label;
+                    }).join('<br>');
+                    div.style.background = 'white';
+                    div.style.padding = '6px';
+                    div.style.boxShadow = '0 0 6px rgba(0,0,0,0.2)';
+                    return div;
+                };
+                legend.addTo(map_dcaf9f795da2fbd3e164c2551930d882);
+            }
+
+            function updateRoadTemperatures(){
+                if(!roadsGeoJson || !Array.isArray(roadsGeoJson.features)) return;
+                if(!roadsWeather || !Array.isArray(roadsWeather.features)) return;
+
+                var tempMap = {};
+                roadsWeather.features.forEach(function(f){
+                    var idx = f.feature_index;
+                    var temp = null;
+                    try { temp = f.weather.weather.main.temp; } catch(e){ temp = null; }
+                    tempMap[idx] = temp;
+                });
+
+                roadsGeoJson.features.forEach(function(feature, index){
+                    feature.properties = feature.properties || {};
+                    feature.properties.temp = tempMap.hasOwnProperty(index) ? tempMap[index] : null;
+                });
+            }
+
+            function refreshData(){
+                Promise.all([
+                    fetchJson('roads.geojson').catch(function(){ return null; }),
+                    fetchJson('roads_weather.json').catch(function(){ return null; }),
+                    fetchCurrentWeather()
+                ]).then(function(values){
+                    var geo = values[0];
+                    var weatherFile = values[1];
+                    var currentWeather = values[2];
+                    if(geo) roadsGeoJson = geo;
+                    if(weatherFile) roadsWeather = weatherFile;
+                    updateWeatherControl(currentWeather);
+                    updateRoadTemperatures();
+                    renderRoads();
+                    logUpdate('Refreshed at ' + new Date().toLocaleTimeString());
+                    if(currentWeather && currentWeather.temperature_c != null){
+                        logUpdate('Weather API OK: ' + formatTempLabel(currentWeather.temperature_c) + ', ' + currentWeather.condition);
+                    } else {
+                        logUpdate('Weather API response unavailable');
+                    }
+                }).catch(function(err){
+                    console.error('Refresh error', err);
+                    logUpdate('Refresh failed: ' + err.message);
+                });
+            }
+
+            refreshData();
+            setInterval(refreshData, REFRESH_MS);
+
+</script>
+</html>
