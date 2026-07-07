@@ -1,95 +1,88 @@
-# ALVIN Sensor Node — ESP32 + DHT22 + MQ-2
+# ALVIN Sensor Node — ESP32 + DHT22
 
 Firmware for an ALVIN IoT node. It measures temperature & humidity (DHT22) and
-gas/smoke (MQ-2), then pushes readings to the ALVIN backend, which recomputes
-each room's comfort score and updates the web app.
+pushes readings to the ALVIN backend, which recomputes each room's comfort
+score and updates the web app in real time.
 
 ```
-[DHT22] --temp/humidity--\
-                          >--> [ESP32] --WiFi/HTTP--> [ALVIN backend] --> [Firestore] --> [Web app]
-[MQ-2]  --gas/smoke------/         POST /api/sensors/ingest
+[DHT22] --temp/humidity--> [ESP32] --WiFi/HTTP--> [ALVIN backend] --> [Web app]
+                                    POST /api/sensors/ingest
 ```
 
 ## Bill of materials
 
 - ESP32 dev board (e.g. ESP32-WROOM DevKit)
 - DHT22 (AM2302) temperature/humidity sensor
-- MQ-2 gas/smoke sensor module
 - 10 kΩ resistor (DHT22 data pull-up)
-- 2 × 10 kΩ resistors (MQ-2 analog voltage divider)
 - Jumper wires, breadboard
 
-## Wiring
+## Wiring (DHT22)
 
-### DHT22 (digital)
 | DHT22 | ESP32 |
 | ----- | ----- |
-| VCC   | 3V3   |
-| DATA  | GPIO4 (+ 10 kΩ pull-up to 3V3) |
-| GND   | GND   |
+| VCC (pin 1) | 3V3 |
+| DATA (pin 2) | GPIO4 (+ 10 kΩ pull-up between DATA and 3V3) |
+| GND (pin 4) | GND |
 
-### MQ-2 (analog)
-The MQ-2 heater runs on **5V**, and its analog output (AOUT) can swing up to
-~5V. The ESP32 ADC only tolerates **3.3V**, so AOUT must go through a divider.
+> Many DHT22 breakout boards already include the pull-up resistor — then you can
+> wire DATA straight to GPIO4.
 
-```
-MQ-2 AOUT ---[10k]---+---> ESP32 GPIO34 (ADC)
-                     |
-                   [10k]
-                     |
-                    GND
-```
+## Firmware setup
 
-| MQ-2  | ESP32 / Power |
-| ----- | ------------- |
-| VCC   | 5V (VIN)      |
-| GND   | GND           |
-| AOUT  | GPIO34 via the divider above |
-| DOUT  | (unused)      |
-
-> GPIO34 is input-only and on ADC1 — safe to use while WiFi is active.
-> (Avoid ADC2 pins; WiFi uses ADC2.)
-
-## Setup
-
-1. Install the Arduino ESP32 board package and these libraries (Library Manager):
-   - **DHT sensor library** (Adafruit) and **Adafruit Unified Sensor**
+1. Install the Arduino **ESP32 board package**, and these libraries (Library Manager):
+   - **DHT sensor library** (Adafruit) + **Adafruit Unified Sensor**
    - **ArduinoJson** (v6)
 2. Open `alvin_sensor_node/alvin_sensor_node.ino` in the Arduino IDE.
 3. Edit `config.h`:
    - `WIFI_SSID` / `WIFI_PASSWORD`
    - `ALVIN_API_URL` — the **LAN IP** of the machine running the backend
-     (`http://<your-ip>:8000`), not `localhost`.
-   - `NODE_ID` — must match a node already seeded in Firestore
-     (see `alvin-backend/seed.py`, e.g. `node_r610`), and `ROOM_NAME` for the
-     device list.
-4. Select your ESP32 board + port and upload.
-5. Open Serial Monitor at **115200 baud**. The MQ-2 warms up for ~20 s, then
-   self-calibrates `Ro` in (assumed) clean air.
+     (`http://<your-ip>:8000`), **not** `localhost`.
+   - `NODE_ID` — must match a node in the backend (default seed includes
+     `node_r610`), and `ROOM_NAME` for the device list.
+4. Select your ESP32 board + port and **Upload**.
+5. Open Serial Monitor @ **115200 baud** — you should see readings and
+   `POST /api/sensors/ingest -> 200`.
 
-## How it connects to the web app
+## End-to-end: see real data in the web app
 
-- On boot the node `POST`s to **`/api/devices`** so it appears in the web app's
-  device list (Analytics → Devices).
-- Every `SEND_INTERVAL_MS` it `POST`s to **`/api/sensors/ingest`**:
-  ```json
-  { "sensor_id": "esp32-01", "node_id": "node_r610",
-    "temperature": 24.3, "humidity": 58, "air_quality": 22 }
-  ```
-- The backend saves the raw reading, recomputes the node's `comfort_score`, and
-  updates the room. The frontend then reflects it via `/api/rooms` and
-  `/api/dashboard/*` (the LIVE badges light up).
+You do **not** need Firebase for this. If no Firebase credentials are present the
+backend runs an **in-memory datastore** seeded with the Seda BGC rooms, so the
+whole pipeline works locally.
 
-Make sure the backend allows the device: it does not need CORS (that's only for
-browsers), but the backend must be reachable on your LAN and running **with
-Firebase credentials** for the data to persist.
+1. **Start the backend** (binds all interfaces so the ESP32 can reach it):
+   ```bash
+   cd alvin-backend
+   pip install -r requirements.txt
+   uvicorn main:app --host 0.0.0.0 --port 8000
+   ```
+   The log should say `Datastore: IN-MEMORY ...`.
+2. **Find your computer's LAN IP** (e.g. `ipconfig getifaddr en0` on macOS) and
+   put `http://<that-ip>:8000` in `config.h` → `ALVIN_API_URL`.
+3. **Start the frontend**:
+   ```bash
+   npm run dev
+   ```
+   Set `VITE_API_URL` in the frontend `.env` to `http://localhost:8000` (default).
+4. **Power the ESP32.** Within a few seconds it registers itself and starts
+   posting readings.
+5. Open the web app → **Analytics** (and the **Digital Twin** room status). The
+   room bound to `NODE_ID` now shows the **live DHT22 temperature/humidity**, the
+   comfort score recalculates, and the **● LIVE** badge appears.
 
-## Calibration notes (MQ-2)
+### Quick test without hardware
+Post a reading by hand to confirm the pipeline:
+```bash
+curl -X POST http://localhost:8000/api/sensors/ingest \
+  -H 'Content-Type: application/json' \
+  -d '{"sensor_id":"esp32-01","node_id":"node_r610","temperature":26.4,"humidity":61}'
+```
+Refresh the web app — Room 610's readings and comfort score update.
 
-- `Ro` is measured at boot assuming the surrounding air is clean. Power the node
-  in fresh air for the first run.
-- `MQ2_CLEAN_AIR_RATIO` (9.83) and the smoke curve in `mq2SmokePPM()` are
-  datasheet approximations. For accuracy, calibrate against a known gas source
-  and adjust the curve constants and `airQualityIndex()` mapping.
-- The MQ-2 is best treated as a **relative smoke/gas trend + fire alarm**, not a
-  lab-grade ppm meter.
+## Notes
+
+- The `ESP32` and the computer running the backend must be on the **same WiFi
+  network**.
+- The in-memory datastore **resets on backend restart**. For persistence,
+  configure `FIREBASE_CREDENTIALS` (see `alvin-backend/README.md`) and the same
+  endpoints persist to Firestore instead.
+- `air_quality` is optional on the backend, so DHT22-only nodes don't send it.

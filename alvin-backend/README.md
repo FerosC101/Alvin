@@ -15,8 +15,10 @@ cp .env.example .env   # then fill in the values
 Provide the Firebase Admin SDK service-account JSON and point
 `FIREBASE_CREDENTIALS` at it. Add an `OPENWEATHER_API_KEY` for live weather.
 
-> Without credentials the server still boots (degraded mode): weather works,
-> but Firestore-backed endpoints return **503** until configured.
+> **No Firebase? It still works.** Without credentials the server runs an
+> **in-memory datastore** seeded with the Seda BGC rooms — sensor ingestion, the
+> dashboard endpoints, and the web app all function locally (data resets on
+> restart). Configure `FIREBASE_CREDENTIALS` to persist to Firestore instead.
 
 ## Run
 

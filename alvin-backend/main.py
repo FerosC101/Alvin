@@ -37,38 +37,120 @@ CREDENTIALS_PATH = os.getenv(
 )
 OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY", "")
 
-# Allow the Vite frontend (dev server) to call this API from the browser.
+# Allow the Vite frontend (dev server) to call this API from the browser, on
+# any localhost port.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[o.strip() for o in CORS_ORIGINS if o.strip()],
+    allow_origin_regex=r"http://localhost:\d+",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Initialize Firebase. If credentials are missing we start in a degraded mode
-# so the API can still boot for local frontend work — Firestore-backed
-# endpoints then return a clear 503 instead of crashing the whole server.
-db = None
-if os.path.exists(CREDENTIALS_PATH):
+
+# --- IN-MEMORY FIRESTORE SHIM ---------------------------------------------
+# A tiny in-memory store that mimics the subset of the Firestore API this app
+# uses, so the whole pipeline (ESP32 -> ingest -> dashboard) works locally
+# WITHOUT Firebase credentials. If real credentials are present we use
+# Firestore instead and this shim is never touched.
+class _MemDoc:
+    def __init__(self, data, cid, did):
+        self._data, self._cid, self._did = data, cid, did
+
+    @property
+    def exists(self):
+        return self._did in self._data.get(self._cid, {})
+
+    def to_dict(self):
+        return dict(self._data.get(self._cid, {}).get(self._did, {}))
+
+    def set(self, payload, merge=False):
+        col = self._data.setdefault(self._cid, {})
+        if merge and self._did in col:
+            col[self._did].update(payload)
+        else:
+            col[self._did] = dict(payload)
+
+    def update(self, payload):
+        self._data.setdefault(self._cid, {}).setdefault(self._did, {}).update(payload)
+
+    def get(self):
+        return self
+
+
+class _MemCollection:
+    def __init__(self, data, cid):
+        self._data, self._cid = data, cid
+
+    def document(self, did):
+        return _MemDoc(self._data, self._cid, did)
+
+    def stream(self):
+        col = self._data.get(self._cid, {})
+        return [_MemDoc(self._data, self._cid, did) for did in list(col.keys())]
+
+
+class InMemoryDB:
+    def __init__(self):
+        self._data = {}
+
+    def collection(self, cid):
+        return _MemCollection(self._data, cid)
+
+
+def seed_memory(store):
+    """Seed the in-memory DB with the Seda BGC building so the web app has
+    data to show even before any sensor connects. Node ids match the firmware."""
+    rooms = [
+        ("node_r610", "Room 610", "Premier Suite · 6F", "610", 95, 24.3, 52, 0.6, 30, 2, 2),
+        ("node_r501", "Room 501", "Deluxe Room · 5F", "501", 92, 24.1, 54, 0.5, 32, 2, 2),
+        ("node_r803", "Room 803", "Corner Suite · 8F", "803", 82, 25.2, 55, 0.5, 34, 1, 3),
+        ("node_r712", "Room 712", "Deluxe Room · 7F", "712", 75, 25.8, 60, 0.4, 38, 2, 2),
+        ("node_r502", "Room 502", "Deluxe Room · 5F", "502", 70, 26.9, 58, 0.3, 40, 0, 2),
+        ("node_pool", "Pool Deck", "Amenities · 5F", "PD", 64, 27.8, 63, 0.4, 55, 12, 40),
+        ("node_restaurant", "Straight Up", "Dining · 11F", "11F", 58, 28.6, 66, 0.7, 60, 34, 90),
+        ("node_function", "Function Room", "Events · 2F", "2F", 50, 29.7, 68, 0.8, 52, 40, 120),
+        ("node_lobby", "Lobby", "Ground Floor", "GF", 40, 31.1, 70, 0.2, 58, 25, 80),
+    ]
+    for nid, name, wing, room_no, score, temp, hum, air, noise, occ, cap in rooms:
+        store.collection("nodes").document(nid).set({
+            "id": nid, "name": name, "floor": 1, "x": 0.0, "y": 0.0, "type": "room",
+            "comfort_score": score, "wing": wing, "room_no": room_no,
+            "temperature": temp, "humidity": hum, "airflow": air, "noise": noise,
+            "occupancy": occ, "capacity": cap,
+        })
+    devices = [
+        ("esp32-01", "Room 610", ["Temp", "Humidity"], 100, "online", "just now"),
+        ("esp32-02", "Room 501", ["Temp", "Humidity"], 88, "online", "8s ago"),
+        ("esp32-03", "Room 712", ["Temp", "Humidity"], 74, "online", "12s ago"),
+    ]
+    for did, room, sensors, battery, status, last_seen in devices:
+        store.collection("devices").document(did).set({
+            "id": did, "room": room, "sensors": sensors,
+            "battery": battery, "status": status, "last_seen": last_seen,
+        })
+
+
+# Initialize the datastore: Firestore if credentials exist, else in-memory.
+USING_FIRESTORE = os.path.exists(CREDENTIALS_PATH)
+if USING_FIRESTORE:
     cred = credentials.Certificate(CREDENTIALS_PATH)
     if not firebase_admin._apps:
         firebase_admin.initialize_app(cred)
     db = firestore.client()
+    print("Datastore: Firestore (Firebase credentials found).")
 else:
+    db = InMemoryDB()
+    seed_memory(db)
     print(
-        f"WARNING: Firebase credentials '{CREDENTIALS_PATH}' not found. "
-        "Firestore endpoints will return 503 until configured."
+        "Datastore: IN-MEMORY (no Firebase credentials). Data resets on restart. "
+        "Sensor readings and the web app work locally."
     )
 
 
 def require_db():
-    """Guard for Firestore-backed endpoints when running without credentials."""
-    if db is None:
-        raise HTTPException(
-            status_code=503,
-            detail="Firestore unavailable: Firebase credentials not configured.",
-        )
+    """Kept for compatibility; the datastore is always available now."""
     return db
 
 # --- PYDANTIC SCHEMAS (Data Validation) ---
@@ -128,7 +210,7 @@ class SensorReading(BaseModel):
     node_id: str             # e.g., "node_001" - Crucial for linking data to the map!
     temperature: float       # Temperature in Celsius
     humidity: float          # Humidity percentage (0-100)
-    air_quality: float       # Air Quality Index (AQI)
+    air_quality: float = 50.0  # Air Quality Index (optional; DHT22-only nodes omit it)
     airflow: Optional[float] = None   # m/s (optional)
     noise: Optional[float] = None     # dB (optional)
     occupancy: Optional[int] = None   # people currently in the space (optional)
@@ -140,7 +222,12 @@ class SensorReading(BaseModel):
 
 @app.get("/")
 def read_root():
-    return {"status": "online", "project": "ALVIN Backend Engine", "firebase_connected": db is not None}
+    return {
+        "status": "online",
+        "project": "ALVIN Backend Engine",
+        "firebase_connected": USING_FIRESTORE,
+        "datastore": "firestore" if USING_FIRESTORE else "memory",
+    }
 
 # Endpoint to add or update a structural Node
 @app.post("/api/nodes", tags=["Map Infrastructure"])
