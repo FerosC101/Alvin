@@ -90,16 +90,11 @@
   color: #04140f;
 }
 
-/* Best route — map-dominant card */
+/* Best route — full-bleed 2D map widget */
 .card--route {
-  gap: 8px;
-}
-
-.route__top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  padding: 0;
+  overflow: hidden;
+  position: relative;
 }
 
 .route__badge {
@@ -109,31 +104,7 @@
   border: 1px solid currentColor;
   border-radius: 999px;
   white-space: nowrap;
-}
-
-.route__dest {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.route__dest-text {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.route__dest-name {
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.route__dest-addr {
-  font-size: 11px;
-  color: var(--alvin-text-dim);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  background: rgba(10, 17, 32, 0.55);
 }
 
 .route__body {
@@ -192,13 +163,56 @@
    Stacked below the route info text; fills the full card width.
    flex: 1 lets it grow to consume remaining card height. */
 .route__minimap {
-  width: 100%;
-  min-height: 120px;
-  flex: 1;
-  border-radius: 8px;
+  position: absolute;
+  inset: 0;
+}
+
+.route__minimap-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+/* Overlay chrome floating over the full-bleed map */
+.route__minimap-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 14px 22px;
+  background: linear-gradient(to bottom, rgba(10, 17, 32, 0.9), rgba(10, 17, 32, 0));
+  pointer-events: none;
+}
+
+.route__minimap-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.route__minimap-kicker {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--alvin-text-dim);
+}
+
+.route__minimap-dest {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.route__minimap-addr {
+  font-size: 11px;
+  color: var(--alvin-text-dim);
+  white-space: nowrap;
   overflow: hidden;
-  border: 1px solid var(--alvin-border);
-  position: relative;
+  text-overflow: ellipsis;
 }
 
 /* Distance/duration overlay at the bottom of the mini map. */

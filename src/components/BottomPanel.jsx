@@ -149,7 +149,8 @@ const MINI_ORIGIN = DEFAULT_ORIGIN          // device location (fallback)
 const MINI_DEST   = EVAC_CENTER.coords      // Seda BGC
 const MINI_CENTER = MINI_DEST
 const MINI_BOUNDS = [[121.034, 14.538], [121.063, 14.563]]
-const MINI_VIEW   = { center: MINI_CENTER, zoom: 15.2, pitch: 58, bearing: -20 }
+// Flat 2D top-down view (no pitch / bearing).
+const MINI_VIEW   = { center: MINI_CENTER, zoom: 14.6, pitch: 0, bearing: 0 }
 
 function addMiniBuildings(map) {
   const style = map.getStyle()
@@ -171,7 +172,7 @@ function addMiniBuildings(map) {
   }, firstSymbol)
 }
 
-function MiniRouteMap({ colour = '#00d4ff' }) {
+function MiniRouteMap({ colour = '#00d4ff', label, mode, destName, addr }) {
   const containerRef = useRef(null)
   const mapRef       = useRef(null)
   const [routeInfo, setRouteInfo] = useState(null)
@@ -189,7 +190,6 @@ function MiniRouteMap({ colour = '#00d4ff' }) {
       interactive: true,
       attributionControl: false,
     })
-    map.on('load', () => addMiniBuildings(map))
 
     // Origin pin
     const originEl = document.createElement('span')
@@ -213,6 +213,11 @@ function MiniRouteMap({ colour = '#00d4ff' }) {
         </svg>
       </span>`
     new maplibregl.Marker({ element: destEl, anchor: 'bottom' }).setLngLat(MINI_DEST).addTo(map)
+
+    // Ensure the map fills its (absolutely-positioned) container.
+    map.on('load', () => map.resize())
+    const ro = new ResizeObserver(() => map.resize())
+    ro.observe(containerRef.current)
 
     mapRef.current = map
 
@@ -245,14 +250,14 @@ function MiniRouteMap({ colour = '#00d4ff' }) {
         (bb, c) => bb.extend(c),
         new maplibregl.LngLatBounds(coords[0], coords[0]),
       )
-      map.fitBounds(b, { padding: 34, duration: 800, pitch: 30, maxZoom: 16 })
+      map.fitBounds(b, { padding: 40, duration: 800, pitch: 0, bearing: 0, maxZoom: 16 })
       if (!cancelled) setRouteInfo({ distance: primary.distance, duration: primary.duration, alternatives: routes.length })
     }
 
     if (map.isStyleLoaded()) draw()
     else map.once('load', draw)
 
-    return () => { cancelled = true; map.remove() }
+    return () => { cancelled = true; ro.disconnect(); map.remove() }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Animate colour change — no re-init needed.
@@ -265,7 +270,21 @@ function MiniRouteMap({ colour = '#00d4ff' }) {
 
   return (
     <div className="route__minimap">
-      <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
+      <div ref={containerRef} className="route__minimap-canvas" />
+
+      <div className="route__minimap-top">
+        <div className="route__minimap-titles">
+          <span className="route__minimap-kicker">
+            {label}<span className="live-dot"> ● LIVE</span>
+          </span>
+          <span className="route__minimap-dest">{destName}</span>
+          {addr && <span className="route__minimap-addr">{addr}</span>}
+        </div>
+        {mode && (
+          <span className="route__badge" style={{ color: colour, borderColor: colour }}>{mode}</span>
+        )}
+      </div>
+
       {routeInfo && (
         <div className="route__minimap-meta">
           {(routeInfo.distance / 1000).toFixed(2)} km · ~{Math.round(routeInfo.duration / 60)} min walk
@@ -333,27 +352,13 @@ function BestRouteCard() {
 
   return (
     <article className="card card--route">
-      <div className="route__top">
-        <span className="card__label">
-          {cardLabel}
-          <span className="live-dot"> ● LIVE</span>
-        </span>
-        <span className="route__badge" style={{ color: colour, borderColor: colour }}>
-          {modeLabel}
-        </span>
-      </div>
-
-      <div className="route__dest">
-        <span className="route__mode-dot" style={{ background: colour }} aria-hidden="true" />
-        <div className="route__dest-text">
-          <span className="route__dest-name">{EVAC_CENTER.name}</span>
-          <span className="route__dest-addr">
-            {isEmergency ? 'Evacuation route' : EVAC_CENTER.address}
-          </span>
-        </div>
-      </div>
-
-      <MiniRouteMap colour={colour} />
+      <MiniRouteMap
+        colour={colour}
+        label={cardLabel}
+        mode={modeLabel}
+        destName={EVAC_CENTER.name}
+        addr={isEmergency ? 'Evacuation route' : EVAC_CENTER.address}
+      />
     </article>
   )
 }
