@@ -40,9 +40,6 @@ export default function TopBar() {
           <Icon name="bell" size={18} />
           <span className="topbar__badge">2</span>
         </button>
-        <button className="topbar__avatar" aria-label="Account">
-          <Icon name="user" size={18} />
-        </button>
       </div>
     </header>
   )

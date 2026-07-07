@@ -21,6 +21,12 @@
   color: var(--alvin-text-dim);
 }
 
+.section-title {
+  margin: 24px 0 12px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
 .panel {
   background: var(--alvin-surface);
   border: 1px solid var(--alvin-border);
@@ -342,11 +348,19 @@
 }
 
 /* 3D Twin layout */
+/* Digital Twin — maximized 3D canvas + status panel */
+.page--twin {
+  padding: 12px;
+  overflow: hidden;
+  display: flex;
+}
+
 .twin__layout {
+  flex: 1;
+  min-height: 0;
   display: grid;
-  grid-template-columns: 1fr 240px;
-  gap: 14px;
-  min-height: 440px;
+  grid-template-columns: 1fr clamp(280px, 24vw, 340px);
+  gap: 12px;
 }
 
 .twin__canvas {
@@ -357,10 +371,32 @@
   background: var(--alvin-bg);
 }
 
+.twin__overlay-title {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+}
+
+.twin__overlay-kicker {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--alvin-accent);
+}
+
+.twin__overlay-name {
+  font-size: 22px;
+  font-weight: 800;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+}
+
 .twin__notice {
   position: absolute;
-  left: 12px;
-  bottom: 12px;
+  left: 16px;
+  bottom: 16px;
   padding: 7px 12px;
   font-size: 12px;
   color: var(--alvin-text-dim);
@@ -369,16 +405,24 @@
   border-radius: 8px;
 }
 
-.twin__sidebar {
+.twin__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+
+.twin__spaces {
   display: flex;
   flex-direction: column;
   gap: 6px;
   overflow-y: auto;
-  max-height: 520px;
   padding-right: 4px;
+  flex: 1 1 40%;
+  min-height: 0;
 }
 
-.twin__room-btn {
+.twin__chip {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -392,19 +436,90 @@
   text-align: left;
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s;
+  flex-shrink: 0;
 }
 
-.twin__room-btn:hover {
+.twin__chip:hover {
   border-color: var(--alvin-accent-2);
 }
 
-.twin__room-btn--active {
+.twin__chip--active {
   border-color: var(--alvin-accent);
   background: var(--alvin-surface-2);
 }
 
+.twin__chip-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.twin__status {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  background: var(--alvin-surface);
+  border: 1px solid var(--alvin-border);
+  border-radius: 14px;
+  box-shadow: var(--alvin-shadow);
+  flex-shrink: 0;
+}
+
+.twin__status-wing {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: var(--alvin-accent);
+}
+
+.twin__status-name {
+  margin: 3px 0 0;
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.twin__status-sub {
+  font-size: 12px;
+  color: var(--alvin-text-dim);
+}
+
+.twin__metrics {
+  display: flex;
+  flex-direction: column;
+}
+
+.twin__metric {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 8px 0;
+  color: var(--alvin-text-dim);
+  border-bottom: 1px solid var(--alvin-border);
+}
+
+.twin__metric:last-child {
+  border-bottom: none;
+}
+
+.twin__metric-value {
+  font-weight: 600;
+  color: var(--alvin-text);
+}
+
 @media (max-width: 900px) {
+  .page--twin {
+    overflow-y: auto;
+  }
   .twin__layout {
     grid-template-columns: 1fr;
+  }
+  .twin__canvas {
+    min-height: 60vh;
+  }
+  .twin__spaces {
+    flex-direction: row;
+    flex-wrap: wrap;
   }
 }

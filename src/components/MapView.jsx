@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import maplibregl from 'maplibre-gl'
 import { useEmergency } from '../context/EmergencyContext'
-import { fetchNearestEvac } from '../services/api'
 import { useRoute, routeColour } from '../context/RouteContext'
 import Icon from './Icon'
 import './MapView.css'
 
-// Bonifacio Global City, Taguig. MapLibre uses [lng, lat].
-const BGC_CENTER = [121.0489, 14.5509]
+// Seda BGC, Taguig. MapLibre uses [lng, lat].
+const BGC_CENTER = [121.0505, 14.5527]
 const BGC_BOUNDS = [
   [121.034, 14.538], // south-west
   [121.063, 14.563], // north-east
@@ -131,7 +130,7 @@ export default function MapView({ onBuildingClick }) {
     el.className = 'building-marker'
     el.type = 'button'
     el.innerHTML = `
-      <span class="building-marker__label">Main Building</span>
+      <span class="building-marker__label">Seda BGC</span>
       <span class="building-marker__pin">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"/><path d="M16 8h2a2 2 0 0 1 2 2v11"/><path d="M2 21h20M8 7h.01M12 7h.01M8 11h.01M12 11h.01M8 15h.01M12 15h.01"/>
@@ -269,14 +268,8 @@ export default function MapView({ onBuildingClick }) {
 
     let cancelled = false
     const draw = async () => {
-      // Resolve the nearest partner evacuation center (fallback to default).
-      let dest = evac
-      const near = await fetchNearestEvac(origin.coords[1], origin.coords[0])
-      if (near?.status === 'success' && near.nearest) {
-        const n = near.nearest
-        dest = { name: n.name, partner: n.partner, address: n.address, coords: [n.lng, n.lat] }
-      }
-      if (cancelled || !mapRef.current) return
+      // Route to Seda BGC (the partner safe building) from the device location.
+      const dest = evac
       setTarget(dest)
 
       const { geometry, distance, duration } = await getRoute(origin.coords, dest.coords)

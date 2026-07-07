@@ -1,17 +1,35 @@
 import { createContext, useContext, useState } from 'react'
-import { USER_LOCATION, EVAC_CENTER } from '../data/mockData'
+import { EVAC_CENTER, DEFAULT_ORIGIN } from '../data/mockData'
 
 const EmergencyContext = createContext(null)
 
 // Global emergency mode: when active, the map draws an evacuation route from
-// the user's location to the partner evacuation center.
+// the user's live device location to Seda BGC (the partner safe building).
 export function EmergencyProvider({ children }) {
   const [active, setActive] = useState(false)
+  const [origin, setOrigin] = useState({ name: 'Your location', coords: DEFAULT_ORIGIN })
+
+  const activate = () => {
+    setActive(true)
+    // Ask the browser for the device's current position for accurate routing.
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) =>
+          setOrigin({
+            name: 'Your location',
+            coords: [pos.coords.longitude, pos.coords.latitude],
+          }),
+        () => {}, // denied/unavailable — keep the fallback origin
+        { enableHighAccuracy: true, timeout: 6000 },
+      )
+    }
+  }
+
   const value = {
     active,
-    origin: USER_LOCATION,
+    origin,
     evac: EVAC_CENTER,
-    activate: () => setActive(true),
+    activate,
     deactivate: () => setActive(false),
   }
   return <EmergencyContext.Provider value={value}>{children}</EmergencyContext.Provider>

@@ -1,29 +1,28 @@
 import { useState } from 'react'
 import MapView from '../components/MapView'
 import BuildingPanel from '../components/BuildingPanel'
-import BottomPanel from '../components/BottomPanel'
-import { NavigationSelector } from '../components/BottomPanel'
+import BottomPanel, { NavigationSelector } from '../components/BottomPanel'
 import './MapOverview.css'
 
 export default function MapOverview() {
-  const [open, setOpen] = useState(true)
+  // Building details are a click-only pop-up over the map (closed by default).
+  const [open, setOpen] = useState(false)
 
   return (
     <div className="map-overview">
       <div className="map-overview__stage">
-        <MapView onBuildingClick={() => setOpen(true)} />
-        {open ? (
-          <div className="map-overview__aside">
+        <MapView onBuildingClick={() => setOpen((o) => !o)} />
+        {open && (
+          <div className="map-overview__pop">
             <BuildingPanel onClose={() => setOpen(false)} />
           </div>
-        ) : (
-          <button className="map-overview__reopen" onClick={() => setOpen(true)}>
-            Building details
-          </button>
         )}
       </div>
-      <NavigationSelector />
-      <BottomPanel />
+
+      <div className="map-overview__bottom">
+        <NavigationSelector />
+        <BottomPanel />
+      </div>
     </div>
   )
 }

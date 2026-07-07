@@ -23,13 +23,10 @@ const ICONS = {
 }
 
 const NAV_ITEMS = [
-  { to: '/3d-twin', label: '3D Twin', key: 'twin' },
+  { to: '/digital-twin', label: 'Digital Twin', key: 'twin' },
   { to: '/', label: 'Map Overview', key: 'map', end: true },
-  { to: '/environmental', label: 'Environmental', key: 'environmental' },
-  { to: '/recommendations', label: 'Recommendations', key: 'recommendations' },
-  { to: '/emergency', label: 'Emergency', key: 'emergency' },
-  { to: '/devices', label: 'Devices', key: 'devices' },
   { to: '/analytics', label: 'Analytics', key: 'analytics' },
+  { to: '/emergency', label: 'Emergency', key: 'emergency' },
   { to: '/settings', label: 'Settings', key: 'settings' },
 ]
 

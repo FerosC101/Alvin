@@ -6,6 +6,10 @@
   padding: 0 12px 12px;
 }
 
+.bottom-panel--duo {
+  grid-template-columns: 1fr 1fr;
+}
+
 /* Cards stretch to the tallest in the row; distribute their content so none
    is left with a big empty gap. */
 .card {

@@ -5,58 +5,71 @@
   flex-direction: column;
 }
 
+/* Map fills the stage full-width; ~3/4 of the height. */
 .map-overview__stage {
-  flex: 1;
+  position: relative;
+  flex: 3;
   min-height: 0;
   display: flex;
 }
 
-/* MapView carries its own 12px margin; the aside matches on the remaining sides. */
-.map-overview__aside {
+/* Building details — click-only pop-up overlaying the right side of the map. */
+.map-overview__pop {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  bottom: 24px;
+  width: clamp(280px, 24vw, 340px);
+  z-index: 500;
+  display: flex;
+  animation: pop-in 0.18s ease;
+}
+
+@keyframes pop-in {
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Bottom metrics — ~1/4 of the height. */
+.map-overview__bottom {
+  flex: 1;
+  min-height: 190px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  width: clamp(280px, 24vw, 340px);
-  flex-shrink: 0;
-  margin: 12px 12px 12px 0;
+  overflow: hidden;
+}
+
+/* Let the two cards fill the slim bottom band and fit within it. */
+.map-overview__bottom .bottom-panel {
+  flex: 1;
   min-height: 0;
 }
 
-.map-overview__reopen {
-  align-self: flex-start;
-  margin: 12px 12px 12px 0;
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid var(--alvin-border);
-  background: var(--alvin-surface);
-  color: var(--alvin-text);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: var(--alvin-shadow);
+.map-overview__bottom .card {
+  min-height: 0;
+  overflow: hidden;
 }
 
-.map-overview__reopen:hover {
-  border-color: var(--alvin-accent-2);
+.map-overview__bottom .route__minimap {
+  min-height: 0;
 }
 
-/* Below the split-view breakpoint the page becomes a scrollable column:
-   the map gets a guaranteed height, the panel drops below it full width. */
 @media (max-width: 1024px) {
   .map-overview {
     overflow-y: auto;
   }
   .map-overview__stage {
-    flex-direction: column;
-    min-height: 0;
-  }
-  .map-overview__stage > .mapview {
     flex: none;
-    height: 58vh;
-    min-height: 340px;
+    height: 60vh;
+    min-height: 360px;
   }
-  .map-overview__aside {
-    width: auto;
-    margin: 0 12px 12px;
+  .map-overview__pop {
+    top: 12px;
+    right: 12px;
+    bottom: 12px;
+    width: min(340px, 82%);
+  }
+  .map-overview__bottom {
+    flex: none;
   }
 }

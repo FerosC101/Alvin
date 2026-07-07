@@ -3,7 +3,7 @@ import maplibregl from 'maplibre-gl'
 import {
   RECOMMENDATIONS,
   EMERGENCY_STATUS,
-  USER_LOCATION,
+  DEFAULT_ORIGIN,
   EVAC_CENTER,
   comfortColor,
 } from '../data/mockData'
@@ -134,7 +134,9 @@ async function getWalkingRoute(from, to) {
 }
 
 const MINI_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
-const MINI_CENTER = USER_LOCATION.coords
+const MINI_ORIGIN = DEFAULT_ORIGIN          // device location (fallback)
+const MINI_DEST   = EVAC_CENTER.coords      // Seda BGC
+const MINI_CENTER = MINI_DEST
 const MINI_BOUNDS = [[121.034, 14.538], [121.063, 14.563]]
 const MINI_VIEW   = { center: MINI_CENTER, zoom: 15.2, pitch: 58, bearing: -20 }
 
@@ -186,7 +188,7 @@ function MiniRouteMap({ colour = '#00d4ff' }) {
       <path d="M16 8h2a2 2 0 0 1 2 2v11"/>
       <path d="M2 21h20M8 7h.01M12 7h.01M8 11h.01M12 11h.01M8 15h.01M12 15h.01"/>
     </svg>`
-    new maplibregl.Marker({ element: originEl, anchor: 'bottom' }).setLngLat(MINI_CENTER).addTo(map)
+    new maplibregl.Marker({ element: originEl, anchor: 'bottom' }).setLngLat(MINI_ORIGIN).addTo(map)
 
     // Destination pin — cyan accent, NOT emergency red
     const destEl = document.createElement('div')
@@ -199,13 +201,13 @@ function MiniRouteMap({ colour = '#00d4ff' }) {
           <circle cx="12" cy="10" r="3"/>
         </svg>
       </span>`
-    new maplibregl.Marker({ element: destEl, anchor: 'bottom' }).setLngLat(EVAC_CENTER.coords).addTo(map)
+    new maplibregl.Marker({ element: destEl, anchor: 'bottom' }).setLngLat(MINI_DEST).addTo(map)
 
     mapRef.current = map
 
     let cancelled = false
     const draw = async () => {
-      const { geometry, distance, duration } = await getWalkingRoute(USER_LOCATION.coords, EVAC_CENTER.coords)
+      const { geometry, distance, duration } = await getWalkingRoute(MINI_ORIGIN, MINI_DEST)
       if (cancelled || !mapRef.current) return
 
       map.addSource('mini-route', { type: 'geojson', data: { type: 'Feature', geometry } })
@@ -215,7 +217,7 @@ function MiniRouteMap({ colour = '#00d4ff' }) {
         layout: { 'line-cap': 'round', 'line-join': 'round' },
         paint: { 'line-color': colour, 'line-width': 4 } })
 
-      map.easeTo({ center: [121.0526, 14.5490], zoom: 14.5, pitch: 45, bearing: -20, duration: 900 })
+      map.easeTo({ center: [121.048, 14.5498], zoom: 14.6, pitch: 45, bearing: -20, duration: 900 })
       if (!cancelled) setRouteInfo({ distance, duration })
     }
 
@@ -385,10 +387,9 @@ function EmergencyCard() {
 
 export default function BottomPanel() {
   return (
-    <div className="bottom-panel">
+    <div className="bottom-panel bottom-panel--duo">
       <RecommendedCard />
       <BestRouteCard />
-      <EmergencyCard />
     </div>
   )
 }
