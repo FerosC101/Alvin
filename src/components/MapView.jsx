@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import maplibregl from 'maplibre-gl'
 import { useEmergency } from '../context/EmergencyContext'
+import { useRoute, routeColour } from '../context/RouteContext'
 import Icon from './Icon'
 import './MapView.css'
 
@@ -79,6 +80,7 @@ export default function MapView({ onBuildingClick }) {
   clickRef.current = onBuildingClick
   const evacMarkerRef = useRef(null)
   const { active, origin, evac } = useEmergency()
+  const { routePath, navigationPreference } = useRoute()
   const [now, setNow] = useState(() => new Date())
   const [routeInfo, setRouteInfo] = useState(null)
 
@@ -118,6 +120,108 @@ export default function MapView({ onBuildingClick }) {
     mapRef.current = map
     return () => map.remove()
   }, [])
+
+  // Draw / clear the indoor route overlay whenever routePath or routing mode changes.
+  // This follows the same pattern as the evacuation route effect: same map instance,
+  // same glow+line layer structure, same source update approach. The only thing
+  // that changes between modes is the polyline data and line colour.
+  // Camera stays locked on INITIAL_VIEW (Main Building) — no fitBounds.
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+
+    let isActive = true
+
+    // Colour per routing mode, matching the spec:
+    //   emergency → red    (same as evacuation route)
+    //   covered   → blue   (rain / covered walkways)
+    //   shaded    → orange (sunny / shaded paths)
+    //   default   → cyan   (cloudy / shortest)
+    const colour = routeColour(navigationPreference)
+
+    const ROUTE_SOURCE = 'indoor-route'
+    const ROUTE_LAYER_GLOW = 'indoor-route-glow'
+    const ROUTE_LAYER_LINE = 'indoor-route-line'
+    const NODES_SOURCE = 'indoor-route-nodes'
+    const NODES_LAYER = 'indoor-route-nodes-layer'
+
+    // Always remove all layers before redrawing — same clean-slate approach
+    // the emergency effect uses. Avoids stale colour or geometry.
+    const removeLayers = () => {
+      for (const id of [ROUTE_LAYER_LINE, ROUTE_LAYER_GLOW, NODES_LAYER]) {
+        if (map.getLayer(id)) map.removeLayer(id)
+      }
+      if (map.getSource(ROUTE_SOURCE)) map.removeSource(ROUTE_SOURCE)
+      if (map.getSource(NODES_SOURCE)) map.removeSource(NODES_SOURCE)
+    }
+
+    const draw = () => {
+      if (!isActive || !mapRef.current) return
+
+      removeLayers()
+
+      if (!routePath || routePath.length < 2) return
+
+      const coordinates = routePath.map((node) => [node.lng, node.lat])
+
+      // --- Route line (glow + solid), identical structure to evac-route layers ---
+      map.addSource(ROUTE_SOURCE, {
+        type: 'geojson',
+        data: { type: 'Feature', geometry: { type: 'LineString', coordinates } },
+      })
+      map.addLayer({
+        id: ROUTE_LAYER_GLOW,
+        type: 'line',
+        source: ROUTE_SOURCE,
+        paint: { 'line-color': colour, 'line-width': 12, 'line-blur': 8, 'line-opacity': 0.45 },
+      })
+      map.addLayer({
+        id: ROUTE_LAYER_LINE,
+        type: 'line',
+        source: ROUTE_SOURCE,
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': colour, 'line-width': 4 },
+      })
+
+      // --- Node waypoint circles ---
+      map.addSource(NODES_SOURCE, {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: routePath.map((node) => ({
+            type: 'Feature',
+            geometry: { type: 'Point', coordinates: [node.lng, node.lat] },
+            properties: { name: node.name, floor: node.floor },
+          })),
+        },
+      })
+      map.addLayer({
+        id: NODES_LAYER,
+        type: 'circle',
+        source: NODES_SOURCE,
+        paint: {
+          'circle-radius': 6,
+          'circle-color': colour,
+          'circle-stroke-width': 2,
+          'circle-stroke-color': '#0b1220',
+          'circle-opacity': 0.95,
+        },
+      })
+
+      // Keep the map centered on Main Building — no fitBounds.
+      // easeTo animates smoothly back to the initial view, same as when
+      // the emergency mode is deactivated.
+      map.easeTo({ ...INITIAL_VIEW, duration: 800 })
+    }
+
+    if (map.isStyleLoaded()) draw()
+    else map.once('load', draw)
+
+    return () => {
+      isActive = false
+      if (mapRef.current?.isStyleLoaded()) removeLayers()
+    }
+  }, [routePath, navigationPreference])
 
   // Draw / clear the evacuation route when emergency mode toggles.
   useEffect(() => {

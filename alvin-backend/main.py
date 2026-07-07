@@ -12,6 +12,11 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 import networkx as nx
 
+# ALVIN Dynamic Environmental Navigation — in-memory routing layer.
+# This import allows the /api/navigate endpoint to delegate to the mock-based
+# router for testing "auto" and "emergency" preferences without Firebase.
+from router import navigate_mock
+
 app = FastAPI(
     title="ALVIN Backend Engine",
     description="Core infrastructure, routing, and Firebase bridge for Project ALVIN",
@@ -87,7 +92,8 @@ class Edge(BaseModel):
     source: str      # id of starting node
     target: str      # id of destination node
     distance: float  # distance in meters
-    is_covered: bool # true if it has a roof
+    is_covered: bool # true if it has a roof (penalised under "covered" / rainy "auto")
+    is_shaded: bool = False  # true if shaded by trees or overhang (penalised under sunny "auto")
     status: str = "open" # "open", "blocked_by_fire", "blocked_by_flood"
 
 class SensorReading(BaseModel):
@@ -132,77 +138,207 @@ def create_or_update_edge(edge: Edge):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# --- NEW: NAVIGATION ENGINE ---
+# --- NAVIGATION ENGINE HELPERS ---
+
+def _compute_edge_weight(edge_data: dict, nodes_dict: dict, effective_preference: str) -> float:
+    """
+    Returns the routing weight for a single edge given a fully-resolved preference string.
+
+    Blocked edges always return inf regardless of preference, so the pathfinder
+    never considers them.  The three original modes are reproduced exactly;
+    'shaded' is the only addition (used internally by 'auto' on sunny days).
+
+    effective_preference must be one of:
+        'shortest'   – weight is raw distance only
+        'covered'    – uncovered edges penalised +100 m (original rain logic)
+        'comfortable'– edges leading to low-comfort nodes penalised proportionally
+        'shaded'     – unshaded edges penalised +50 m (sunny-day comfort routing)
+    """
+    # Blocked paths are impassable in every mode.
+    if edge_data.get("status", "open") != "open":
+        return float("inf")
+
+    base_weight = edge_data["distance"]
+
+    if effective_preference == "covered":
+        # Original logic: strongly penalise uncovered segments so the router
+        # prefers any covered alternative within a ~100 m detour budget.
+        if not edge_data.get("is_covered", True):
+            base_weight += 100.0
+
+    elif effective_preference == "comfortable":
+        # Original logic: penalise edges leading to uncomfortable nodes.
+        # Each comfort point below 100 adds 2 m of virtual distance.
+        target_node_id = edge_data["target"]
+        comfort = nodes_dict.get(target_node_id, {}).get("comfort_score", 100.0)
+        base_weight += (100.0 - comfort) * 2.0
+
+    elif effective_preference == "shaded":
+        # Sunny-day routing: prefer shaded walkways when distances are similar.
+        # Half the covered penalty (50 m) because shade is a comfort preference,
+        # not a safety rule — we won't force very long detours just for shade.
+        if not edge_data.get("is_shaded", False):
+            base_weight += 50.0
+
+    # 'shortest' falls through with no additional penalty.
+    return base_weight
+
+
+def _resolve_auto_preference(weather: dict) -> str:
+    """
+    Translates live weather data into a concrete routing preference string.
+
+    Resolution order (first match wins):
+        1. Raining or drizzling  → 'covered'  (safety: avoid getting wet)
+        2. Clear or sunny        → 'shaded'   (comfort: avoid direct sun exposure)
+        3. Anything else         → 'shortest' (neutral: clouds, haze, unknown)
+
+    If the weather call failed, get_sta_mesa_weather() already returns a safe
+    fallback dict with is_raining=False and condition='Unknown', so this
+    function will return 'shortest' and the router degrades gracefully.
+    """
+    if weather.get("is_raining", False):
+        return "covered"
+    condition = weather.get("condition", "Unknown").lower()
+    if condition in ("clear", "sunny"):
+        return "shaded"
+    return "shortest"
+
+
+def _format_route_path(path: list[str], nodes_dict: dict) -> list[dict]:
+    """Format a route path while preserving geoposition data from the backend graph."""
+    formatted_route = []
+    for node_id in path:
+        node_info = nodes_dict.get(node_id, {})
+        formatted_route.append({
+            "id": node_id,
+            "name": node_info.get("name", node_id),
+            "floor": node_info.get("floor"),
+            "x": node_info.get("x"),
+            "y": node_info.get("y"),
+            "lat": node_info.get("lat"),
+            "lng": node_info.get("lng"),
+            "comfort_score": node_info.get("comfort_score", 100.0),
+        })
+    return formatted_route
+
+
+# --- NAVIGATION ENGINE ---
 
 @app.get("/api/navigate", tags=["Navigation Engine"])
 def navigate(
     start_node: str = Query(..., description="ID of the starting node"),
     end_node: str = Query(..., description="ID of the destination node"),
-    preference: str = Query("shortest", description="Options: 'shortest', 'covered', 'comfortable'")
+    preference: str = Query(
+        "shortest",
+        description=(
+            "Routing preference. Options: "
+            "'shortest' (default) — raw distance only; "
+            "'covered' — avoid uncovered paths (rainy conditions); "
+            "'comfortable' — avoid low-comfort-score nodes; "
+            "'auto' — selects covered/shaded/shortest based on live weather; "
+            "'emergency' — shortest safe route to the nearest reachable exit node, "
+            "ignoring end_node."
+        ),
+    ),
+    weather: str = Query(
+        "Cloudy",
+        description=(
+            "Weather override for testing the mock routing layer. "
+            "Only used when preference is 'auto' or 'emergency'. "
+            "Valid values: 'Clear', 'Rain', 'Cloudy'. "
+            "When the live weather API is wired in, this parameter will be ignored."
+        ),
+    ),
 ):
     """
     ALVIN Dynamic Pathfinding Engine.
     Computes real-time routing paths while adjusting to structural blocks and comfort preferences.
     """
+    # ------------------------------------------------------------------
+    # DYNAMIC ENVIRONMENTAL NAVIGATION — mock routing layer intercept.
+    #
+    # When preference is "auto" or "emergency", delegate to the in-memory
+    # routing module instead of querying Firebase.  This allows the new
+    # weather-aware and emergency-aware routing logic to be developed and
+    # tested without a live database or weather API.
+    #
+    # The React frontend is unaffected — the response shape is identical.
+    # Existing preference values ("shortest", "covered", "comfortable")
+    # continue to hit the Firestore-backed path below as before.
+    # ------------------------------------------------------------------
+    if preference in ("auto", "emergency"):
+        try:
+            emergency_flag = (preference == "emergency")
+            return navigate_mock(
+                start=start_node,
+                end=end_node,
+                weather_condition=weather,
+                emergency=emergency_flag,
+            )
+        except nx.NodeNotFound as e:
+            raise HTTPException(status_code=404, detail=f"Location error: {str(e)}")
+        except nx.NetworkXNoPath:
+            raise HTTPException(
+                status_code=400,
+                detail="Navigation Impossible: No safe pathways exist.",
+            )
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Internal Engine Error: {str(e)}")
+
+    # ------------------------------------------------------------------
+    # ORIGINAL FIRESTORE-BACKED ROUTING (unchanged).
+    #
+    # Existing callers passing preference="shortest" / "covered" /
+    # "comfortable" execute this path exactly as they did before.
+    # ------------------------------------------------------------------
     require_db()
     try:
-        G = nx.Graph()
-        
-        # Fetch nodes
+        # ------------------------------------------------------------------
+        # 1. Load nodes and edges from Firestore (same as before).
+        # ------------------------------------------------------------------
+        effective_preference = preference
         nodes_ref = db.collection("nodes").stream()
         nodes_dict = {}
         for doc in nodes_ref:
             node_data = doc.to_dict()
             nodes_dict[node_data["id"]] = node_data
-            G.add_node(node_data["id"], **node_data)
-            
-        # Fetch edges
-        edges_ref = db.collection("edges").stream()
-        for doc in edges_ref:
-            edge_data = doc.to_dict()
-            base_weight = edge_data["distance"]
-            
-            # Dynamic weights
-            if edge_data.get("status", "open") != "open":
-                base_weight = float('inf') 
-            elif preference == "covered" and not edge_data.get("is_covered", True):
-                base_weight += 100.0 
-            elif preference == "comfortable":
-                target_node_id = edge_data["target"]
-                target_node_info = nodes_dict.get(target_node_id, {})
-                comfort = target_node_info.get("comfort_score", 100.0)
-                base_weight += (100.0 - comfort) * 2.0
 
-            G.add_edge(edge_data["source"], edge_data["target"], weight=base_weight, **edge_data)
-            
-        # Run Shortest Path
+        edges_ref = db.collection("edges").stream()
+        # Store raw edge dicts so emergency routing can reuse them.
+        all_edges: list[dict] = [doc.to_dict() for doc in edges_ref]
+
+        # ------------------------------------------------------------------
+        # 2. NORMAL ROUTING (shortest / covered / comfortable)
+        #    Identical to the original implementation; weight calculation is
+        #    now delegated to _compute_edge_weight for clarity.
+        # ------------------------------------------------------------------
+        G = nx.Graph()
+        for node_id, node_data in nodes_dict.items():
+            G.add_node(node_id, **node_data)
+
+        for edge_data in all_edges:
+            weight = _compute_edge_weight(edge_data, nodes_dict, effective_preference)
+            G.add_edge(edge_data["source"], edge_data["target"], weight=weight, **edge_data)
+
         path = nx.shortest_path(G, source=start_node, target=end_node, weight="weight")
-        
-        # Format output
-        formatted_route = []
-        for node_id in path:
-            node_info = nodes_dict.get(node_id, {})
-            formatted_route.append({
-                "id": node_id,
-                "name": node_info.get("name", node_id),
-                "floor": node_info.get("floor"),
-                "x": node_info.get("x"),
-                "y": node_info.get("y"),
-                "comfort_score": node_info.get("comfort_score", 100.0)
-            })
-            
+
+        formatted_route = _format_route_path(path, nodes_dict)
+
         return {
             "status": "success",
             "navigation_preference": preference,
             "total_steps": len(path),
             "route_sequence": path,
-            "detailed_path": formatted_route
+            "detailed_path": formatted_route,
         }
 
     except nx.NodeNotFound as e:
         raise HTTPException(status_code=404, detail=f"Location error: {str(e)}")
     except nx.NetworkXNoPath:
         raise HTTPException(status_code=400, detail="Navigation Impossible: No safe pathways exist.")
+    except HTTPException:
+        raise  # re-raise our own errors unchanged
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal Engine Error: {str(e)}")
 
@@ -343,18 +479,29 @@ def get_sta_mesa_weather():
 
 
 @app.get("/api/weather/current", tags=["Sensor Data & Intelligence"])
-
 def fetch_current_weather():
-
     """
-
     Dashboard Endpoint: Returns current outdoor conditions in Sta. Mesa.
+    Includes route_mode — the recommended routing strategy based on current
+    weather — so the frontend can use it directly without duplicating logic.
 
-    Used by the frontend to display weather warnings.
-
+    route_mode values:
+        "shaded"   — heat index >= 38 °C  → prefer shaded paths
+        "covered"  — raining or drizzling → prefer covered walkways
+        "shortest" — neutral conditions   → take the shortest route
     """
+    weather = get_sta_mesa_weather()
 
-    return get_sta_mesa_weather()
+    # Compute the route mode from the weather data returned above.
+    if weather.get("is_raining", False):
+        route_mode = "covered"
+    elif weather.get("heat_index_c", 0) >= 38:
+        route_mode = "shaded"
+    else:
+        route_mode = "shortest"
+
+    weather["route_mode"] = route_mode
+    return weather
 
 
 @app.post("/api/sensors/ingest", tags=["Sensor Data & Intelligence"])

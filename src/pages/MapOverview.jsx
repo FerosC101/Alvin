@@ -2,6 +2,7 @@ import { useState } from 'react'
 import MapView from '../components/MapView'
 import BuildingPanel from '../components/BuildingPanel'
 import BottomPanel from '../components/BottomPanel'
+import { NavigationSelector } from '../components/BottomPanel'
 import './MapOverview.css'
 
 export default function MapOverview() {
@@ -21,6 +22,7 @@ export default function MapOverview() {
           </button>
         )}
       </div>
+      <NavigationSelector />
       <BottomPanel />
     </div>
   )

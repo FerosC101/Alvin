@@ -2,6 +2,7 @@ import { useState } from 'react'
 import BuildingViewer from '../components/BuildingViewer'
 import { ROOMS, comfortColor } from '../data/mockData'
 import { modelForRoom, hasDedicatedModel } from '../config/models'
+import { useRoute } from '../context/RouteContext'
 import './pages.css'
 
 export default function ThreeDTwin() {
@@ -11,6 +12,13 @@ export default function ThreeDTwin() {
   const modelUrl = modelForRoom(selectedId)
   // Whole building always "has" a model; a room only if it has a dedicated one.
   const hasRoomModel = !selected || hasDedicatedModel(selected.id)
+  
+  // Read the live route path from context (written by BestRouteCard on map view).
+  const { routePath } = useRoute()
+  // Only draw the overlay when showing the whole building, not individual rooms.
+  const showRoutePath = !selectedId ? routePath : []
+
+  console.log('[ALVIN:ThreeDTwin] routePath from context — length:', routePath.length, '| selectedId:', selectedId, '| showRoutePath length:', showRoutePath.length, showRoutePath)
 
   return (
     <div className="page" style={{ display: 'flex', flexDirection: 'column' }}>
@@ -23,7 +31,7 @@ export default function ThreeDTwin() {
 
       <div className="twin__layout">
         <div className="twin__canvas">
-          <BuildingViewer key={modelUrl} url={modelUrl} />
+          <BuildingViewer key={modelUrl} url={modelUrl} routePath={showRoutePath} />
           {selected && !hasRoomModel && (
             <div className="twin__notice">
               Showing the generic room model — no dedicated model for “{selected.name}” yet.

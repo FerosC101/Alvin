@@ -92,6 +92,18 @@
 .route__name {
   font-size: 15px;
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Coloured dot beside the destination name — matches the route line colour */
+.route__mode-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .route__via {
@@ -116,6 +128,64 @@
   overflow: hidden;
 }
 
+/* Embedded MapLibre mini-map inside BestRouteCard.
+   Stacked below the route info text; fills the full card width.
+   flex: 1 lets it grow to consume remaining card height. */
+.route__minimap {
+  width: 100%;
+  min-height: 120px;
+  flex: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--alvin-border);
+  position: relative;
+}
+
+/* Distance/duration overlay at the bottom of the mini map. */
+.route__minimap-meta {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 5px 10px;
+  background: rgba(11, 18, 32, 0.82);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--alvin-accent-2);
+  text-align: center;
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+}
+
+/* Normal navigation destination marker — accent cyan, NOT emergency red. */
+.nav-dest-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.nav-dest-marker__label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #04140f;
+  background: var(--alvin-accent);
+  padding: 2px 7px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.nav-dest-marker__pin {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  color: #04140f;
+  background: linear-gradient(135deg, var(--alvin-accent), var(--alvin-accent-2));
+  box-shadow: 0 0 0 5px rgba(0, 212, 255, 0.18), 0 3px 10px rgba(0, 0, 0, 0.4);
+}
+
 .route__map-line {
   position: absolute;
   inset: 0;
@@ -124,6 +194,34 @@
     linear-gradient(0deg, transparent 49%, var(--alvin-accent) 49% 51%, transparent 51%);
   background-size: 22px 22px;
   opacity: 0.35;
+}
+
+.route__map-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.route__map-polyline {
+  fill: none;
+  stroke: var(--alvin-accent);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.route__map-node {
+  fill: #60a5fa;
+  stroke: rgba(4, 20, 15, 0.95);
+  stroke-width: 1;
+}
+
+.route__map-node--start {
+  fill: #22c55e;
+}
+
+.route__map-node--end {
+  fill: #ef4444;
 }
 
 /* Emergency */
@@ -188,4 +286,96 @@
   .bottom-panel {
     grid-template-columns: 1fr;
   }
+}
+
+/* ---------------------------------------------------------------------------
+   Navigation Selector — segmented pill control above the bottom panel
+   --------------------------------------------------------------------------- */
+
+.nav-selector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px 8px;
+  flex-shrink: 0;
+}
+
+.nav-selector__label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--alvin-text-dim);
+  white-space: nowrap;
+}
+
+.nav-selector__pills {
+  display: flex;
+  gap: 4px;
+  background: var(--alvin-surface-2);
+  border: 1px solid var(--alvin-border);
+  border-radius: 999px;
+  padding: 3px;
+}
+
+.nav-selector__pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--alvin-text-dim);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.nav-selector__pill:hover {
+  color: var(--alvin-text);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-selector__pill--active {
+  background: var(--alvin-accent);
+  color: #04140f;
+}
+
+.nav-selector__pill--active:hover {
+  background: var(--alvin-accent);
+  color: #04140f;
+}
+
+/* ---------------------------------------------------------------------------
+   ALVIN Smart Recommendation banner — inside BestRouteCard
+   --------------------------------------------------------------------------- */
+
+.route__recommendation {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  background: rgba(0, 212, 255, 0.06);
+  border: 1px solid rgba(0, 212, 255, 0.18);
+  border-radius: 8px;
+  font-size: 11px;
+}
+
+.route__recommendation-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: var(--alvin-accent);
+  text-transform: uppercase;
+}
+
+.route__recommendation-detail {
+  color: var(--alvin-text-dim);
+}
+
+.route__recommendation-mode {
+  font-weight: 700;
+  font-size: 12px;
 }
