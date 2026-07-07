@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ALVIN 3D Twin</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Primary navigation">
+        <div class="brand">
+          <img src="assets/logo.png" alt="ALVIN logo" class="brand-logo" draggable="false" />
+          <div>
+            <h1>ALVIN</h1>
+            <p>Adaptive Living Virtual<br />Intelligence Network</p>
+          </div>
+        </div>
+
+        <nav class="nav-list">
+          <button class="nav-item active">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span>3D Twin</span>
+          </button>
+          <button class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+            <span>Map Overview</span>
+          </button>
+          <button class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><path d="M12 6v6l4 2"/></svg>
+            <span>Environmental</span>
+          </button>
+          <button class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+            <span>Recommendations</span>
+          </button>
+          <button class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span>Emergency</span>
+          </button>
+          <button class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+            <span>Devices</span>
+          </button>
+          <button class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            <span>Analytics</span>
+          </button>
+          <button class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span>Settings</span>
+          </button>
+        </nav>
+
+        <section class="weather-card">
+          <p class="eyebrow">Outdoor Weather</p>
+          <p class="muted">Manila City</p>
+            <div class="weather-now">
+            <div class="rain-cloud" aria-hidden="true"><span></span><i></i><i></i><i></i></div>
+            <div>
+              <strong id="weatherTemp">--<span>C</span></strong>
+              <p id="weatherCondition">Loading weather</p>
+            </div>
+          </div>
+          <dl class="weather-list">
+            <div><dt>Humidity</dt><dd id="weatherHumidity">--%</dd></div>
+            <div><dt>Rain Intensity</dt><dd id="weatherRain">-- mm/h</dd></div>
+            <div><dt>Wind</dt><dd id="weatherWind">-- km/h</dd></div>
+            <div><dt>Heat Index</dt><dd id="weatherHeat" class="good">-- C</dd></div>
+          </dl>
+          <p class="source" id="weatherSource">Source: Open-Meteo<br />Updating...</p>
+        </section>
+      </aside>
+
+      <main class="dashboard">
+        <header class="topbar">
+          <div class="selectors">
+            <div class="select-wrap">
+              <button class="select-trigger" data-menu="building-menu">
+                <span id="buildingLabel">Main Building</span><b></b>
+              </button>
+              <div class="dropdown" id="building-menu">
+                <button data-building="main">Main Building</button>
+                <button data-building="library-wing">Library Wing</button>
+                <button data-building="study-wing">Study Wing</button>
+                <button data-building="admin-core">Admin Core</button>
+                <button data-building="dining-wing">Dining Wing</button>
+                <button data-building="lobby-wing">Lobby Wing</button>
+              </div>
+            </div>
+            <div class="select-wrap">
+              <button class="select-trigger" data-menu="floor-menu">
+                <span id="floorLabel">Ground Floor</span><b></b>
+              </button>
+              <div class="dropdown" id="floor-menu">
+                <button data-floor="ground">Ground Floor</button>
+                <button data-floor="second">Second Floor</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="statusbar">
+            <time datetime="2025-05-16T10:15">May 16, 2025&nbsp;&nbsp;10:15 AM</time>
+            <div class="action-wrap">
+              <button class="icon-btn notification" data-menu="notification-menu" aria-label="Notifications">
+                <svg viewBox="0 0 24 24" width="16" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                <b>2</b>
+              </button>
+              <div class="dropdown popover" id="notification-menu">
+                <p class="eyebrow">Notifications</p>
+                <button>Library airflow adjusted automatically</button>
+                <button>Rain route suggestion updated</button>
+              </div>
+            </div>
+            <div class="action-wrap">
+              <button class="avatar" data-menu="profile-menu" aria-label="User profile"></button>
+              <div class="dropdown popover profile-popover" id="profile-menu">
+                <p class="eyebrow">Alvin Admin</p>
+                <button>View profile</button>
+                <button>Preferences</button>
+                <button>Sign out</button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <section class="map-stage" aria-label="3D twin comfort map">
+          <div class="map-canvas" id="mapCanvas">
+            <div class="map-content" id="mapContent">
+              <img src="assets/map-day.png" alt="" class="stage-reference map-day" id="mapImgDay" draggable="false" />
+              <img src="assets/map-night.png" alt="" class="stage-reference map-night" id="mapImgNight" draggable="false" />
+              <div class="stage-dim"></div>
+              <div class="room-tags" aria-label="Floor rooms"></div>
+            </div>
+          </div>
+
+          <aside class="legend glass">
+            <p class="eyebrow">Comfort Level</p>
+            <ul>
+              <li><span class="dot excellent-dot"></span>Excellent (90-100)</li>
+              <li><span class="dot good-dot"></span>Good (70-89)</li>
+              <li><span class="dot moderate-dot"></span>Moderate (50-69)</li>
+              <li><span class="dot poor-dot"></span>Poor (30-49)</li>
+              <li><span class="dot very-poor-dot"></span>Very Poor (0-29)</li>
+            </ul>
+          </aside>
+
+          <div class="time-control glass">
+            <span class="time-icon sun-icon"></span>
+            <strong id="timeStart">6:00 AM</strong>
+            <input type="range" min="6" max="22" value="10" aria-label="Time of day" />
+            <strong id="timeValue">10:00 AM</strong>
+            <span class="time-icon moon-icon"></span>
+          </div>
+
+          <div class="map-tools glass" aria-label="Map controls">
+            <button id="zoomIn" aria-label="Zoom in">+</button>
+            <button id="zoomOut" aria-label="Zoom out">-</button>
+            <button id="resetMap" aria-label="Reset map">Reset</button>
+          </div>
+
+          <aside class="room-panel glass" aria-live="polite">
+            <button class="close" aria-label="Collapse room details">x</button>
+            <p class="panel-kicker" id="panelZone">Main Building</p>
+            <h2 id="panelName">Library</h2>
+            <p id="panelRoom">Room 101</p>
+            <div class="big-gauge" style="--score: 95"><span>95<small>%</small></span></div>
+            <p class="center">Comfort Score<br /><b id="panelStatus">Excellent</b></p>
+            <dl class="metric-list">
+              <div><dt>Temperature</dt><dd id="panelTemp">24.3C</dd></div>
+              <div><dt>Humidity</dt><dd id="panelHumidity">58%</dd></div>
+              <div><dt>Airflow</dt><dd id="panelAirflow" class="good">Good</dd></div>
+              <div><dt>Noise Level</dt><dd id="panelNoise" class="good">Low (32 dB)</dd></div>
+              <div><dt>Occupancy</dt><dd id="panelOccupancy">23 / 60</dd></div>
+            </dl>
+            <div class="devices-title"><b>IoT Devices</b><span id="deviceCount">3 Active</span></div>
+            <ul class="devices" id="deviceList"></ul>
+            <div class="amenity-card">
+              <b>Nearest Amenities</b>
+              <span id="panelAmenities">Water station, covered waiting area</span>
+            </div>
+            <button class="secondary-btn">View Room Details</button>
+          </aside>
+        </section>
+
+        <section class="bottom-grid">
+          <article class="glass recommendations">
+            <p class="eyebrow">Recommended For You</p>
+            <div class="recommendation-list" id="recommendationList"></div>
+          </article>
+
+          <article class="glass route-card">
+            <p class="eyebrow">Best Route (Rainy)</p>
+            <div class="route-content">
+              <div class="route-copy">
+                <strong id="routeTitle">Covered Path</strong>
+                <span id="routeSubtitle">via Hallway A</span>
+                <p><span id="routeTime">5 min walk</span><em class="walk-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4" r="2"/><path d="M7 14l2-3 3 2 2-4"/><path d="M6 20l2-5h4l1 5"/><path d="M10 9l-1 5"/></svg></em></p>
+              </div>
+              <div class="route-map" aria-hidden="true">
+                <img src="assets/route-map.png" alt="" draggable="false" />
+              </div>
+            </div>
+          </article>
+
+          <article class="glass emergency">
+            <p class="eyebrow">Emergency Status</p>
+            <div class="emergency-main">
+              <div class="shield"></div>
+              <div>
+                <strong>No Active Emergency</strong>
+                <p>All systems normal</p>
+              </div>
+            </div>
+            <ul class="emergency-plan">
+              <li><b>Safe route</b><span>Hallway A</span></li>
+              <li><b>Nearest exit</b><span>Front Lobby</span></li>
+              <li><b>Assembly area</b><span>Covered court</span></li>
+            </ul>
+          </article>
+        </section>
+      </main>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
