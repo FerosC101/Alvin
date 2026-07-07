@@ -1,9 +1,10 @@
 .building-panel {
-  width: 300px;
-  flex-shrink: 0;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   padding: 18px;
   background: var(--alvin-surface);
   border: 1px solid var(--alvin-border);
@@ -50,11 +51,21 @@
 }
 
 .building-panel__viewer {
-  height: 200px;
+  height: clamp(150px, 22vh, 210px);
+  flex-shrink: 0;
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid var(--alvin-border);
   background: var(--alvin-bg);
+}
+
+@media (max-width: 1024px) {
+  .building-panel {
+    flex: none;
+  }
+  .building-panel__viewer {
+    height: 220px;
+  }
 }
 
 .building-panel__metrics {

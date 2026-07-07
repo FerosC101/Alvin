@@ -1,5 +1,5 @@
 .sidebar {
-  width: 236px;
+  width: clamp(220px, 17vw, 248px);
   flex-shrink: 0;
   height: 100%;
   display: flex;
@@ -9,6 +9,12 @@
   background: var(--alvin-surface);
   border-right: 1px solid var(--alvin-border);
   overflow-y: auto;
+}
+
+.sidebar__label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sidebar__brand {
@@ -154,4 +160,27 @@
   gap: 2px;
   font-size: 10px;
   color: var(--alvin-text-dim);
+}
+
+/* Collapse to an icon rail on narrower viewports to reclaim horizontal space. */
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 64px;
+    padding: 16px 8px;
+    gap: 16px;
+    align-items: center;
+  }
+  .sidebar__title,
+  .sidebar__label,
+  .sidebar__weather {
+    display: none;
+  }
+  .sidebar__link {
+    justify-content: center;
+    padding: 10px;
+  }
+  .sidebar__logo {
+    width: 34px;
+    height: 34px;
+  }
 }

@@ -40,7 +40,7 @@ export default function Analytics() {
         ))}
       </div>
 
-      <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', marginTop: 16 }}>
+      <div className="grid grid--2" style={{ marginTop: 16 }}>
         <div className="panel">
           <span className="panel__label">COMFORT BY SPACE</span>
           <div className="barchart">

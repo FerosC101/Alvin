@@ -76,7 +76,7 @@ export default function Sidebar() {
             }
           >
             <span className="sidebar__icon">{ICONS[item.key]}</span>
-            {item.label}
+            <span className="sidebar__label">{item.label}</span>
           </NavLink>
         ))}
       </nav>

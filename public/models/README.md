@@ -8,7 +8,7 @@ Upload the building's 3D model here (used by the **3D Twin** page).
 
 ## Naming
 Name the main file after the building so the viewer can reference it, e.g.:
-
+ 
 ```
 public/models/main-building.glb
 ```
@@ -16,7 +16,7 @@ public/models/main-building.glb
 ## How it's served
 Anything in `public/` is served from the site root. A file at
 `public/models/main-building.glb` is loaded in code as:
-
+3
 ```js
 const MODEL_URL = '/models/main-building.glb'
 ```

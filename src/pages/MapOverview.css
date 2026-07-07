@@ -16,7 +16,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  width: 300px;
+  width: clamp(280px, 24vw, 340px);
   flex-shrink: 0;
   margin: 12px 12px 12px 0;
   min-height: 0;
@@ -40,9 +40,20 @@
   border-color: var(--alvin-accent-2);
 }
 
-@media (max-width: 1000px) {
+/* Below the split-view breakpoint the page becomes a scrollable column:
+   the map gets a guaranteed height, the panel drops below it full width. */
+@media (max-width: 1024px) {
+  .map-overview {
+    overflow-y: auto;
+  }
   .map-overview__stage {
     flex-direction: column;
+    min-height: 0;
+  }
+  .map-overview__stage > .mapview {
+    flex: none;
+    height: 58vh;
+    min-height: 340px;
   }
   .map-overview__aside {
     width: auto;

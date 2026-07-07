@@ -173,8 +173,25 @@
 /* Analytics stat cards */
 .stat-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 14px;
+}
+
+/* Two-column layout that collapses to one on narrow screens. */
+.grid--2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+@media (max-width: 860px) {
+  .grid--2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: 16px 14px;
+  }
 }
 
 .stat-card {

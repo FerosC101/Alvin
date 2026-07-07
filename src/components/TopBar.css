@@ -98,3 +98,33 @@
   color: #fff;
   background: var(--alvin-danger);
 }
+
+@media (max-width: 860px) {
+  .topbar {
+    padding: 0 12px;
+    gap: 10px;
+  }
+  .topbar__date {
+    display: none;
+  }
+  .topbar__right {
+    gap: 10px;
+  }
+}
+
+@media (max-width: 560px) {
+  .topbar__floor,
+  .topbar__sep {
+    display: none;
+  }
+  /* Keep the emergency action compact — icon only. */
+  .topbar__emergency {
+    padding: 8px 10px;
+    font-size: 0;
+    gap: 0;
+  }
+  .topbar__emergency svg {
+    width: 18px;
+    height: 18px;
+  }
+}

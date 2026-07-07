@@ -6,6 +6,12 @@
   padding: 0 12px 12px;
 }
 
+/* Cards stretch to the tallest in the row; distribute their content so none
+   is left with a big empty gap. */
+.card {
+  min-width: 0;
+}
+
 .card {
   display: flex;
   flex-direction: column;
@@ -37,6 +43,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
+  flex: 1; /* fill the card height so it balances with the taller cards */
 }
 
 .reco__item {
@@ -48,6 +55,10 @@
   border-radius: 10px;
   background: var(--alvin-surface-2);
   border: 1px solid var(--alvin-border);
+}
+
+.reco__reason {
+  flex: 1; /* push the score chip to the bottom of the item */
 }
 
 .reco__item--featured {
@@ -260,6 +271,7 @@
 
 .emergency__rows {
   margin: 0;
+  margin-top: auto; /* anchor the detail rows to the bottom of the card */
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -282,9 +294,28 @@
   color: var(--alvin-accent-2);
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 1280px) {
+  .bottom-panel {
+    grid-template-columns: 1fr 1fr;
+  }
+  /* Emergency card spans the full width so there is no orphaned empty cell. */
+  .bottom-panel > .card:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 720px) {
   .bottom-panel {
     grid-template-columns: 1fr;
+  }
+  .bottom-panel > .card:last-child {
+    grid-column: auto;
+  }
+  .nav-selector {
+    flex-wrap: wrap;
+  }
+  .nav-selector__pills {
+    flex-wrap: wrap;
   }
 }
 
