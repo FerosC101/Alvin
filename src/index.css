@@ -14,10 +14,32 @@
   --alvin-danger: #f2555f;
   --alvin-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 8px 24px rgba(0, 0, 0, 0.28);
 
+  /* Text placed ON the (always-dark) map surface — constant across themes. */
+  --on-map: #e8eef8;
+  --on-map-dim: #9fb2cc;
+
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   color-scheme: dark;
   color: var(--alvin-text);
   background-color: var(--alvin-bg);
+}
+
+/* Light theme — the app chrome flips to light; the map stays a dark surface. */
+:root[data-theme='light'] {
+  --alvin-bg: #eef1f7;
+  --alvin-surface: #ffffff;
+  --alvin-surface-2: #eef2f8;
+  --alvin-border: #e2e7f0;
+  --alvin-text: #1e293b;
+  --alvin-text-dim: #647087;
+  --alvin-accent: #0ea88f;
+  --alvin-accent-2: #2563eb;
+  --alvin-active-bg: #e8f0ff;
+  --alvin-active-text: #2563eb;
+  --alvin-warn: #d97706;
+  --alvin-danger: #dc2626;
+  --alvin-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 6px 20px rgba(15, 23, 42, 0.07);
+  color-scheme: light;
 }
 
 * {

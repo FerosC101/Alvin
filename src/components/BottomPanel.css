@@ -199,17 +199,18 @@
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.5px;
-  color: var(--alvin-text-dim);
+  color: var(--on-map-dim);
 }
 
 .route__minimap-dest {
   font-size: 16px;
   font-weight: 800;
+  color: var(--on-map);
 }
 
 .route__minimap-addr {
   font-size: 11px;
-  color: var(--alvin-text-dim);
+  color: var(--on-map-dim);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -429,7 +430,7 @@
 
 .nav-selector__pill:hover {
   color: var(--alvin-text);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--alvin-surface);
 }
 
 .nav-selector__pill--active {

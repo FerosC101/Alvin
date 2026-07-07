@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { BUILDINGS, FLOORS } from '../data/mockData'
 import { useEmergency } from '../context/EmergencyContext'
 import Icon from './Icon'
+import ThemeToggle from './ThemeToggle'
 import './TopBar.css'
 
 const DATE_LABEL = 'May 16, 2025 10:15 AM'
@@ -36,6 +37,7 @@ export default function TopBar() {
           {active ? 'End Emergency' : 'Emergency'}
         </button>
         <span className="topbar__date">{DATE_LABEL}</span>
+        <ThemeToggle />
         <button className="topbar__icon-btn" aria-label="Notifications">
           <Icon name="bell" size={18} />
           <span className="topbar__badge">2</span>

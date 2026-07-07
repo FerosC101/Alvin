@@ -20,7 +20,7 @@
 }
 
 .mapview .maplibregl-ctrl-attrib a {
-  color: var(--alvin-text-dim);
+  color: var(--on-map-dim);
 }
 
 .mapview .maplibregl-ctrl-group {
@@ -74,19 +74,19 @@
   margin-top: 4px;
   font-size: 18px;
   font-weight: 700;
-  color: var(--alvin-text);
+  color: var(--on-map);
 }
 
 .mapview__evac-sub {
   font-size: 11px;
-  color: var(--alvin-text-dim);
+  color: var(--on-map-dim);
 }
 
 .mapview__evac-meta {
   margin-top: 4px;
   font-size: 13px;
   font-weight: 600;
-  color: var(--alvin-text);
+  color: var(--on-map);
 }
 
 .mapview__evac-go {
@@ -161,13 +161,13 @@
 .mapview__clock-time {
   font-size: 15px;
   font-weight: 700;
-  color: var(--alvin-text);
+  color: var(--on-map);
   font-variant-numeric: tabular-nums;
 }
 
 .mapview__clock-date {
   font-size: 11px;
-  color: var(--alvin-text-dim);
+  color: var(--on-map-dim);
 }
 
 /* Clickable building marker */
@@ -185,7 +185,7 @@
 .building-marker__label {
   font-size: 11px;
   font-weight: 700;
-  color: var(--alvin-text);
+  color: var(--on-map);
   background: rgba(10, 17, 32, 0.9);
   border: 1px solid var(--alvin-border);
   padding: 3px 9px;
@@ -227,7 +227,7 @@
   border-radius: 8px;
   border: 1px solid var(--alvin-border);
   background: rgba(18, 26, 43, 0.92);
-  color: var(--alvin-text);
+  color: var(--on-map);
   font-size: 13px;
   cursor: pointer;
   backdrop-filter: blur(6px);
