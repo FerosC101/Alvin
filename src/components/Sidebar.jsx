@@ -6,7 +6,7 @@ import { NAV_ITEMS, NAV_ICONS as ICONS } from '../config/nav'
 import Icon, { weatherIcon } from './Icon'
 import './Sidebar.css'
 
-export default function Sidebar() {
+export default function Sidebar({ open = false, onClose }) {
   const [w, setW] = useState(OUTDOOR_WEATHER)
 
   useEffect(() => {
@@ -29,7 +29,12 @@ export default function Sidebar() {
   }, [])
 
   return (
-    <aside className="sidebar">
+    <>
+      <div
+        className={`sidebar__backdrop${open ? ' sidebar__backdrop--show' : ''}`}
+        onClick={onClose}
+      />
+      <aside className={`sidebar${open ? ' sidebar--open' : ''}`}>
       <div className="sidebar__brand">
         <img className="sidebar__logo" src="/alvin-logo.png" alt="ALVIN logo" />
         <div className="sidebar__title">
@@ -44,6 +49,7 @@ export default function Sidebar() {
             key={item.to}
             to={item.to}
             end={item.end}
+            onClick={onClose}
             className={({ isActive }) =>
               `sidebar__link${isActive ? ' sidebar__link--active' : ''}`
             }
@@ -82,6 +88,7 @@ export default function Sidebar() {
           <span>Updated: {w.updatedAt}</span>
         </div>
       </div>
-    </aside>
+      </aside>
+    </>
   )
 }

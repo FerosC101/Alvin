@@ -7,7 +7,7 @@ import './TopBar.css'
 
 const DATE_LABEL = 'May 16, 2025 10:15 AM'
 
-export default function TopBar() {
+export default function TopBar({ onMenu }) {
   const { active, activate, deactivate } = useEmergency()
   const navigate = useNavigate()
 
@@ -22,6 +22,9 @@ export default function TopBar() {
 
   return (
     <header className="topbar">
+      <button className="topbar__menu" onClick={onMenu} aria-label="Open menu">
+        <Icon name="menu" size={20} />
+      </button>
       <img className="topbar__logo" src="/alvin-logo.png" alt="ALVIN" />
       <div className="topbar__context">
         <span className="topbar__building">{BUILDINGS[0]}</span>

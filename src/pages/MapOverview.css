@@ -69,12 +69,21 @@
     bottom: 12px;
     width: min(340px, 82%);
   }
+  /* Stacked bottom section: natural height, no forced fill (avoids the tall
+     empty Recommended card), and give the map cards an explicit height so the
+     mini map renders. */
   .map-overview__bottom {
     flex: none;
+    min-height: 0;
+    overflow: visible;
   }
-  /* When stacked/scrolling, the full-bleed map card needs an explicit height
-     (its map fills absolutely, so it has no intrinsic height). */
+  .map-overview__bottom .bottom-panel {
+    flex: none;
+  }
+  .map-overview__bottom .reco__list {
+    flex: none;
+  }
   .map-overview__bottom .card--route {
-    min-height: 220px;
+    min-height: 240px;
   }
 }

@@ -9,8 +9,22 @@
   flex-shrink: 0;
 }
 
+.topbar__menu {
+  display: none; /* shown only when the sidebar becomes a drawer */
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--alvin-border);
+  border-radius: 9px;
+  background: var(--alvin-surface-2);
+  color: var(--alvin-text);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
 .topbar__logo {
-  display: none; /* shown only on phones, where the sidebar (brand) is hidden */
+  display: none; /* shown with the hamburger, where the sidebar brand is hidden */
   width: 30px;
   height: 30px;
   object-fit: contain;
@@ -121,7 +135,10 @@
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 1024px) {
+  .topbar__menu {
+    display: inline-flex;
+  }
   .topbar__logo {
     display: block;
   }
