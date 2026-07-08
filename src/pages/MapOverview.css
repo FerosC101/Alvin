@@ -72,4 +72,9 @@
   .map-overview__bottom {
     flex: none;
   }
+  /* When stacked/scrolling, the full-bleed map card needs an explicit height
+     (its map fills absolutely, so it has no intrinsic height). */
+  .map-overview__bottom .card--route {
+    min-height: 220px;
+  }
 }

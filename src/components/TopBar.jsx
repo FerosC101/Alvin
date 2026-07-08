@@ -22,6 +22,7 @@ export default function TopBar() {
 
   return (
     <header className="topbar">
+      <img className="topbar__logo" src="/alvin-logo.png" alt="ALVIN" />
       <div className="topbar__context">
         <span className="topbar__building">{BUILDINGS[0]}</span>
         <span className="topbar__sep">·</span>

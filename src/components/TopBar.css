@@ -9,6 +9,14 @@
   flex-shrink: 0;
 }
 
+.topbar__logo {
+  display: none; /* shown only on phones, where the sidebar (brand) is hidden */
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
 .topbar__context {
   display: flex;
   align-items: center;
@@ -16,6 +24,7 @@
   font-size: 15px;
   font-weight: 600;
   color: var(--alvin-text);
+  min-width: 0;
 }
 
 .topbar__sep {
@@ -109,6 +118,12 @@
   }
   .topbar__right {
     gap: 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .topbar__logo {
+    display: block;
   }
 }
 

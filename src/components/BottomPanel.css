@@ -44,10 +44,14 @@
 
 /* Recommended */
 .reco__list {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   flex: 1; /* fill the card height so it balances with the taller cards */
+}
+
+.reco__item {
+  flex: 1 1 120px; /* one item fills; multiple split evenly */
 }
 
 .reco__item {

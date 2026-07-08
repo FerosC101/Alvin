@@ -1,0 +1,45 @@
+/* Hidden on desktop/tablet; shown only on phones. */
+.bottomnav {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .bottomnav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 900;
+    height: 60px;
+    display: flex;
+    justify-content: space-around;
+    align-items: stretch;
+    background: var(--alvin-surface);
+    border-top: 1px solid var(--alvin-border);
+    padding-bottom: env(safe-area-inset-bottom); /* iPhone home indicator */
+  }
+
+  .bottomnav__link {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    text-decoration: none;
+    color: var(--alvin-text-dim);
+  }
+
+  .bottomnav__link--active {
+    color: var(--alvin-active-text);
+  }
+
+  .bottomnav__icon {
+    display: inline-flex;
+  }
+
+  .bottomnav__label {
+    font-size: 10px;
+    font-weight: 600;
+  }
+}

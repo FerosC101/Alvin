@@ -11,3 +11,13 @@
   display: flex;
   flex-direction: column;
 }
+
+/* Phone: swap the left sidebar for a bottom tab bar. */
+@media (max-width: 600px) {
+  .sidebar {
+    display: none;
+  }
+  .app__content {
+    padding-bottom: 60px; /* room for the fixed bottom nav */
+  }
+}

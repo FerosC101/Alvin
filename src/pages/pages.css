@@ -33,6 +33,7 @@
   border-radius: 12px;
   padding: 16px;
   box-shadow: var(--alvin-shadow);
+  overflow-x: auto; /* wide tables scroll horizontally on small screens */
 }
 
 .panel__label {
