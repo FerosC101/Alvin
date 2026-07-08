@@ -1,20 +1,20 @@
 // -----------------------------------------------------------------------------
-// ALVIN Sensor Node — ESP32 + DHT22  (with WiFi setup portal)
+// ALVIN Sensor Node — ESP32 + DHT22  (single-file sketch, WiFi setup portal)
 //
 // First boot: the ESP32 creates its own WiFi ("ALVIN-Setup"). Connect a phone
-// to it, a captive portal opens, and you enter your home WiFi + the ALVIN
-// backend URL. These are saved to flash, and the node joins your network. On
-// later boots it reconnects automatically — nothing is hardcoded.
+// to it, a captive portal opens, and you enter your WiFi (home or phone
+// hotspot) + the ALVIN backend URL. These are saved to flash and the node joins
+// your network. On later boots it reconnects automatically — nothing hardcoded.
 //
-// It reads temperature & humidity (DHT22) and POSTs to `/api/sensors/ingest`,
-// which recomputes the room's comfort score, and registers itself via
-// `/api/devices` so it appears in the web app.
+// Reads temperature & humidity (DHT22), POSTs to `/api/sensors/ingest` (which
+// recomputes the room's comfort score), and registers itself via `/api/devices`.
 //
-// Libraries (Arduino Library Manager):
-//   - "WiFiManager" by tzapu
-//   - "DHT sensor library" by Adafruit  (+ "Adafruit Unified Sensor")
+// Libraries (Arduino IDE → Library Manager):
+//   - "WiFiManager" by tzapu               (the setup portal)
+//   - "DHT sensor library" by Adafruit     (+ "Adafruit Unified Sensor")
 //   - "ArduinoJson" by Benoit Blanchon (v6)
-// Board: any ESP32 dev board.
+//   (Preferences.h ships with the ESP32 board package — no install needed.)
+// Board: any ESP32 dev board (e.g. "ESP32 Dev Module").
 // -----------------------------------------------------------------------------
 #include <WiFi.h>
 #include <HTTPClient.h>
@@ -22,11 +22,33 @@
 #include <Preferences.h>
 #include <DHT.h>
 #include <ArduinoJson.h>
-#include "config.h"
+
+// ======================= USER CONFIG =========================================
+// Setup portal (the WiFi the ESP32 creates for first-time setup)
+#define AP_SSID          "ALVIN-Setup"
+#define AP_PASSWORD      "alvinsetup"      // must be >= 8 chars
+#define PORTAL_TIMEOUT_S 180               // seconds the portal stays open
+
+// Default backend URL shown in the portal (you can change it there). Use the
+// LAN/hotspot IP of the machine running the backend, e.g. "http://192.168.1.10:8000".
+#define ALVIN_API_URL_DEFAULT "http://192.168.1.10:8000"
+
+// Identity of this node. NODE_ID is the connection key — it must match the
+// backend/app (HARDWARE_NODE_ID). ROOM_NAME shows in the web app's device list.
+#define SENSOR_ID        "esp32-01"
+#define NODE_ID          "node_r610"
+#define ROOM_NAME        "Room 610"
+
+// Timing + pins
+#define SEND_INTERVAL_MS 15000             // how often to push a reading (ms)
+#define DHT_PIN          4                 // DHT22 data pin (10k pull-up to 3V3)
+#define DHT_TYPE         DHT22
+#define RESET_PIN        0                 // hold BOOT at power-on to re-provision
+// =============================================================================
 
 DHT dht(DHT_PIN, DHT_TYPE);
 Preferences prefs;
-String apiBase = ALVIN_API_URL_DEFAULT;   // resolved at setup from the portal
+String apiBase = ALVIN_API_URL_DEFAULT;
 unsigned long lastSend = 0;
 
 // ---------------------------------------------------------------------------

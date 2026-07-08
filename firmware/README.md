@@ -34,10 +34,12 @@ score and updates the web app in real time.
    - **DHT sensor library** (Adafruit) + **Adafruit Unified Sensor**
    - **ArduinoJson** (v6)
    - (`Preferences.h` ships with the ESP32 core — no install needed.)
-2. Open `alvin_sensor_node/alvin_sensor_node.ino` in the Arduino IDE.
-3. `config.h` no longer holds WiFi or the backend URL — those are entered in the
-   setup portal. You only set the node identity (`NODE_ID` must match the backend
-   `HARDWARE_NODE_ID`, default `node_r610`) and, optionally, `ALVIN_API_URL_DEFAULT`.
+2. Open `alvin_sensor_node/alvin_sensor_node.ino` in the Arduino IDE. It's a
+   **single self-contained file** — all settings are in the `USER CONFIG` block
+   at the top.
+3. WiFi and the backend URL are entered in the setup portal (not in code). You
+   normally only need to check the node identity in `USER CONFIG`: `NODE_ID`
+   must match the backend `HARDWARE_NODE_ID` (default `node_r610`).
 4. Select your ESP32 board + port and **Upload**.
 
 ## First-time WiFi setup (captive portal)
@@ -96,6 +98,10 @@ Refresh the web app — Room 610's readings and comfort score update.
 
 - The `ESP32` and the computer running the backend must be on the **same WiFi
   network**.
+- **Phone hotspot works.** In the portal, enter your hotspot's SSID/password,
+  connect the backend computer to the same hotspot, and use that computer's
+  hotspot IP as the backend URL. (A few phones isolate hotspot clients or let
+  the hotspot sleep — if the node can't reach the backend, that's usually why.)
 - The in-memory datastore **resets on backend restart**. For persistence,
   configure `FIREBASE_CREDENTIALS` (see `alvin-backend/README.md`) and the same
   endpoints persist to Firestore instead.
